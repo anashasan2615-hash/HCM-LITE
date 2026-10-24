@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HCM Lite - Modern SaaS Human Capital Management</title>
+  <meta name="description"
+    content="HCM Lite is a high-performance, lightweight HR management dashboard for modern businesses. Effortless attendance, leaves, payroll, and smart assistance.">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+  <!-- Theme Toggle Floating Button -->
+  <div style="position: fixed; top: 1.25rem; right: 1.25rem; z-index: 999;">
+    <button class="btn btn-secondary btn-icon theme-toggle-btn" aria-label="Toggle Theme" onclick="toggleTheme()"
+      id="theme-toggle-btn">
+      <i data-lucide="moon"></i>
+    </button>
+  </div>
+
+  <div class="auth-container">
+    <!-- Left Hero Showcase Panel -->
+    <div class="auth-hero">
+      <div class="auth-hero-brand">
+        <div>
+          <div class="brand-text-logo" style="font-size: 28px;">
+            <span class="brand-hcm">HCM</span><span class="brand-lite">Lite</span>
+          </div>
+          <span
+            style="font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: #94A3B8; font-weight: 600; display: block; margin-top: 4px;">Workforce
+            Intelligence</span>
+        </div>
+      </div>
+
+      <div class="auth-hero-content">
+        <h2 class="auth-hero-title">Human Capital Management, <br><span>Made Effortless.</span></h2>
+        <p class="auth-hero-tagline">
+          Automate attendance tracking, streamline leave management, eliminate payroll calculation headaches, and answer
+          workforce questions with our integrated Smart Helper.
+        </p>
+
+        <!-- Real Feature Highlights (No fake stats, starts completely empty) -->
+        <div class="hero-feature-grid">
+          <div class="hero-feature-card">
+            <div class="hero-feature-icon">
+              <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="hero-feature-title">Live Attendance</div>
+            <p class="hero-feature-desc">Real-time check-in/out, grace allowance, and webcam punch.</p>
+          </div>
+
+          <div class="hero-feature-card">
+            <div class="hero-feature-icon" style="background: rgba(91, 79, 207, 0.2); color: var(--purple-400);">
+              <i data-lucide="calendar-off" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="hero-feature-title">Leave Approvals</div>
+            <p class="hero-feature-desc">Working-day calculation, yearly quota caps, and approval workflow.</p>
+          </div>
+
+          <div class="hero-feature-card">
+            <div class="hero-feature-icon" style="background: rgba(240, 150, 43, 0.2); color: var(--amber-400);">
+              <i data-lucide="receipt" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="hero-feature-title">Official Payslips</div>
+            <p class="hero-feature-desc">Accurate absence deductions, net salary math, and A4 print view.</p>
+          </div>
+
+          <div class="hero-feature-card">
+            <div class="hero-feature-icon" style="background: rgba(56, 189, 248, 0.2); color: #38BDF8;">
+              <i data-lucide="bot" style="width: 20px; height: 20px;"></i>
+            </div>
+            <div class="hero-feature-title">Smart Helper AI</div>
+            <p class="hero-feature-desc">Role-scoped workforce assistant answering queries instantly.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-hero-footer">
+        <p style="font-size: 0.85rem; color: #64748B; margin: 0;">
+          Saylani IT Training &bull; Beginner Track Hackathon Project &bull; Pure HTML5, CSS3 &amp; Vanilla ES6+
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Interactive Form Panel -->
+    <div class="auth-form-panel">
+      <div class="auth-card" id="auth-card-box">
+        <div class="auth-panel-brand mb-3" style="text-align: left;">
+          <div class="brand-text-logo light-bg" style="font-size: 24px;">
+            <span class="brand-hcm brand-dark">HCM</span><span class="brand-lite brand-lite-teal">Lite</span>
+          </div>
+        </div>
+        <!-- Rendered dynamically by script based on isFirstRun() -->
+        <div id="auth-dynamic-content" class="fade-in">
+          <div class="text-center p-4">
+            <div class="skeleton" style="height: 32px; width: 60%; margin: 0 auto 1rem;"></div>
+            <div class="skeleton" style="height: 18px; width: 85%; margin: 0 auto 2rem;"></div>
+            <div class="skeleton" style="height: 48px; width: 100%; margin-bottom: 1rem;"></div>
+            <div class="skeleton" style="height: 48px; width: 100%; margin-bottom: 1rem;"></div>
+            <div class="skeleton" style="height: 48px; width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/storage.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+
+  <script>
+    // Immediate Session Check
+    (function checkExistingSession() {
+      const user = getCurrentUser();
+      if (user) {
+        if (user.role === 'admin') {
+          window.location.replace('pages/admin.html');
+        } else {
+          window.location.replace('pages/employee.html');
+        }
+      }
+    })();
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderAuthView();
+    });
+
+    function renderAuthView() {
+      const container = document.getElementById('auth-dynamic-content');
+      if (!container) return;
+
+      const firstRun = isFirstRun();
+
+      if (firstRun) {
+        // First Run Setup Screen
+        container.innerHTML = `
+          <div class="auth-card-header">
+            <span class="setup-badge">
+              <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+              Initial Workspace Setup
+            </span>
+            <h2 class="auth-card-title mt-2">Create Your Organization</h2>
+            <p class="auth-card-subtitle">
+              Welcome to HCM Lite! Set up your organization and master administrator login to get started.
+            </p>
+          </div>
+
+          <form id="setup-form" novalidate onsubmit="handleFirstRunSubmit(event)">
+            <div class="form-group">
+              <label class="form-label" for="setup-company-name">Organization / Company Name</label>
+              <div class="input-with-icon">
+                <i data-lucide="building" class="field-icon"></i>
+                <input type="text" id="setup-company-name" class="form-control" placeholder="e.g. Acme Innovations" required autofocus>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="setup-admin-name">Administrator Full Name</label>
+              <div class="input-with-icon">
+                <i data-lucide="user" class="field-icon"></i>
+                <input type="text" id="setup-admin-name" class="form-control" placeholder="e.g. Izhan Hassan" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="setup-email">Administrator Work Email</label>
+              <div class="input-with-icon">
+                <i data-lucide="mail" class="field-icon"></i>
+                <input type="email" id="setup-email" class="form-control" placeholder="admin@company.com" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="setup-password">Master Password</label>
+              <div class="input-with-icon has-toggle">
+                <i data-lucide="lock" class="field-icon"></i>
+                <input type="password" id="setup-password" class="form-control" placeholder="Minimum 6 characters" required>
+                <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                  <i data-lucide="eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="setup-confirm-password">Confirm Master Password</label>
+              <div class="input-with-icon has-toggle">
+                <i data-lucide="lock" class="field-icon"></i>
+                <input type="password" id="setup-confirm-password" class="form-control" placeholder="Repeat your password" required>
+                <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                  <i data-lucide="eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block mt-3" id="setup-submit-btn">
+              <span>Complete Setup &amp; Launch Dashboard</span>
+              <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+            </button>
+          </form>
+
+          <div class="mt-4 pt-3 text-center" style="border-top: 1px dashed var(--border-color);">
+            <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">
+              Data is stored securely in your browser's LocalStorage.
+            </span>
+            <a href="javascript:void(0)" onclick="handleResetAppData()" style="font-size: 0.78rem; color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+              <i data-lucide="rotate-ccw" style="width: 12px; height: 12px;"></i>
+              <span>Clear browser data</span>
+            </a>
+          </div>
+        `;
+      } else {
+        // Standard Sign-In Screen
+        const company = getCompany();
+        const companyName = company && company.name ? company.name : 'Organization Workspace';
+        const users = getUsers();
+        const adminUser = users.find(u => u.role === 'admin');
+
+        container.innerHTML = `
+          <div class="auth-card-header">
+            <span class="badge badge-teal mb-2">
+              <i data-lucide="shield-check" style="width: 13px; height: 13px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>
+              Secure Portal
+            </span>
+            <h2 class="auth-card-title">Welcome back</h2>
+            <p class="auth-card-subtitle">
+              <strong style="color: var(--teal-600);">${escapeHtml(companyName)}</strong> &bull; Sign in with your work email and password to access your dashboard.
+            </p>
+          </div>
+
+          <form id="login-form" novalidate onsubmit="handleLoginSubmit(event)">
+            <div class="form-group">
+              <label class="form-label" for="login-email">Work Email Address</label>
+              <div class="input-with-icon">
+                <i data-lucide="mail" class="field-icon"></i>
+                <input type="email" id="login-email" class="form-control" placeholder="name@company.com" required autofocus>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label mb-0" for="login-password">Password</label>
+                <a href="javascript:void(0)" onclick="showToast('Contact administrator, or click Reset App Data below to start a fresh demo.', 'info', 4000)" style="font-size: 0.8rem; color: var(--teal-600); text-decoration: none;" title="Password help">Need help?</a>
+              </div>
+              <div class="input-with-icon has-toggle">
+                <i data-lucide="lock" class="field-icon"></i>
+                <input type="password" id="login-password" class="form-control" placeholder="Enter your password" required>
+                <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                  <i data-lucide="eye"></i>
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block mt-3" id="login-submit-btn">
+              <span>Sign In to Dashboard</span>
+              <i data-lucide="log-in" style="width: 18px; height: 18px;"></i>
+            </button>
+          </form>
+
+          ${adminUser ? `
+          <div class="mt-3 p-2 text-center" style="background: var(--bg-surface); border-radius: var(--radius-sm); border: 1px solid var(--border-color); font-size: 0.78rem; color: var(--text-secondary);">
+            <i data-lucide="key" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 4px; color: var(--teal-500);"></i>
+            <span>Registered Admin: <strong>${escapeHtml(adminUser.email)}</strong></span>
+          </div>
+          ` : ''}
+
+          <div class="mt-4 pt-3 text-center" style="border-top: 1px dashed var(--border-color);">
+            <div class="d-flex justify-content-center gap-2 flex-wrap mb-3">
+              <span class="badge badge-teal" style="font-size: 0.75rem;">Administrator: Full Control</span>
+              <span class="badge badge-amber" style="font-size: 0.75rem;">Employee: Self-Service</span>
+            </div>
+            <div>
+              <a href="javascript:void(0)" onclick="handleResetAppData()" style="font-size: 0.8rem; color: var(--red-500); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; font-weight: 500;">
+                <i data-lucide="rotate-ccw" style="width: 13px; height: 13px;"></i>
+                <span>Reset app data (Fresh Start Setup)</span>
+              </a>
+            </div>
+          </div>
+        `;
+      }
+
+      // Re-initialize icons and password visibility toggles
+      if (window.lucide) lucide.createIcons();
+      initPasswordToggles();
+      wireLiveInputValidation();
+    }
+
+    function wireLiveInputValidation() {
+      document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('input', () => {
+          clearFieldError(input);
+        });
+      });
+    }
+
+    function handleResetAppData() {
+      if (confirm("Reset All App Data?\n\nThis will completely clear your browser's LocalStorage (all users, settings, attendance records, and leaves) and return you to the fresh Initial Setup screen for a clean demo.")) {
+        localStorage.clear();
+        showToast('App data reset! Starting fresh workspace...', 'info', 1500);
+        setTimeout(() => {
+          window.location.reload();
+        }, 400);
+      }
+    }
+
+    function handleFirstRunSubmit(e) {
+      e.preventDefault();
+      const companyInput = document.getElementById('setup-company-name');
+      const adminNameInput = document.getElementById('setup-admin-name');
+      const emailInput = document.getElementById('setup-email');
+      const passwordInput = document.getElementById('setup-password');
+      const confirmInput = document.getElementById('setup-confirm-password');
+
+      clearAllFieldErrors(document.getElementById('setup-form'));
+
+      let hasError = false;
+
+      if (!companyInput.value.trim()) {
+        showFieldError(companyInput, 'Please enter your organization name');
+        hasError = true;
+      }
+      if (!adminNameInput.value.trim()) {
+        showFieldError(adminNameInput, 'Please enter administrator full name');
+        hasError = true;
+      }
+      if (!emailInput.value.trim() || !isValidEmail(emailInput.value.trim())) {
+        showFieldError(emailInput, 'Please enter a valid email address');
+        hasError = true;
+      }
+      if (!passwordInput.value || passwordInput.value.length < 6) {
+        showFieldError(passwordInput, 'Password must be at least 6 characters long');
+        hasError = true;
+      }
+      if (passwordInput.value !== confirmInput.value) {
+        showFieldError(confirmInput, 'Passwords do not match');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      const submitBtn = document.getElementById('setup-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Configuring Workspace...</span>`;
+
+      const result = setupFirstRun({
+        companyName: companyInput.value.trim(),
+        adminName: adminNameInput.value.trim(),
+        email: emailInput.value.trim(),
+        password: passwordInput.value
+      });
+
+      if (result.success) {
+        showToast('Workspace created successfully! Redirecting...', 'success', 2000);
+        setTimeout(() => {
+          window.location.replace('pages/admin.html');
+        }, 800);
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Complete Setup &amp; Launch Dashboard</span><i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>`;
+        if (window.lucide) lucide.createIcons();
+        showToast(result.error || 'Failed to initialize workspace', 'error');
+      }
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const emailInput = document.getElementById('login-email');
+      const passwordInput = document.getElementById('login-password');
+
+      clearAllFieldErrors(document.getElementById('login-form'));
+
+      let hasError = false;
+      if (!emailInput.value.trim()) {
+        showFieldError(emailInput, 'Email address is required');
+        hasError = true;
+      }
+      if (!passwordInput.value) {
+        showFieldError(passwordInput, 'Password is required');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      const submitBtn = document.getElementById('login-submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Signing in...</span>`;
+
+      const result = login(emailInput.value.trim(), passwordInput.value);
+
+      if (result.success) {
+        showToast(`Welcome back, ${result.user.name}!`, 'success', 1800);
+        setTimeout(() => {
+          if (result.user.role === 'admin') {
+            window.location.replace('pages/admin.html');
+          } else {
+            window.location.replace('pages/employee.html');
+          }
+        }, 600);
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Sign In to Dashboard</span><i data-lucide="log-in" style="width: 18px; height: 18px;"></i>`;
+        if (window.lucide) lucide.createIcons();
+        showFieldError(passwordInput, result.error || 'Invalid credentials');
+        showToast(result.error || 'Sign-in failed', 'error');
+      }
+    }
+  </script>
+</body>
+
+</html>
