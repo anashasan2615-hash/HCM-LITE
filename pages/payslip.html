@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payroll & Salary Slip - HCM Lite</title>
+  <meta name="description" content="Generate and print official corporate salary vouchers, attendance deductions, and net compensation in HCM Lite.">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Mobile Sidebar Overlay Backdrop -->
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- Fixed Sidebar (Dynamic based on role) -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-text-logo">
+          <span class="brand-hcm">HCM</span><span class="brand-lite">Lite</span>
+        </div>
+        <span class="sidebar-company-name">Payroll</span>
+      </div>
+
+      <nav class="sidebar-nav" id="payslip-sidebar-nav">
+        <!-- Rendered based on user role -->
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-signout-btn" onclick="logout('../index.html')">
+          <i data-lucide="log-out"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Application Header -->
+      <header class="top-header">
+        <div class="topbar-left">
+          <button class="btn btn-secondary btn-icon mobile-nav-toggle hide-desktop" aria-label="Toggle Navigation Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <h1 class="header-title" style="font-size: 1.25rem; font-weight: 700; margin: 0;">Monthly Payslip</h1>
+            <span class="hide-mobile" style="font-size: 0.8rem; color: var(--text-muted);">Verified compensation, absence deductions, and salary computation</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="date-chip hide-mobile">
+            <i data-lucide="calendar"></i>
+            <span id="top-header-date">Today</span>
+          </div>
+
+          <button class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">
+            <i data-lucide="moon"></i>
+          </button>
+
+          <!-- User Menu -->
+          <div class="dropdown-wrapper">
+            <button class="profile-pill" onclick="openChangePasswordModal()" aria-label="User profile and settings">
+              <div class="avatar avatar-teal nav-user-avatar">US</div>
+              <div class="profile-pill-info hide-mobile">
+                <div class="nav-user-name">User</div>
+                <div class="nav-user-role">Role</div>
+              </div>
+              <i data-lucide="key-round" title="Change Password"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content Body -->
+      <main class="page-body">
+        <!-- Selector Control Bar (Hidden on print) -->
+        <div class="controls payslip-controls-card no-print">
+          <div class="form-group" id="employee-picker-col">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label" style="margin-bottom: 0;" for="payslip-employee-select">Select Employee</label>
+              <span id="payslip-role-badge" class="badge" style="font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 600; background: rgba(15, 157, 138, 0.12); color: var(--primary); border: 1px solid rgba(15, 157, 138, 0.25);">Employee</span>
+            </div>
+            <select id="payslip-employee-select" class="form-control" onchange="loadPayslipVoucher()">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="payslip-month-select">Pay Period Month</label>
+            <select id="payslip-month-select" class="form-control" onchange="loadPayslipVoucher()">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <button class="btn btn-primary btn-print" onclick="window.print()" id="btn-print-payslip">
+              <i data-lucide="printer" style="width: 16px; height: 16px;"></i>
+              <span>Print / Save as PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Official Payslip Sheet -->
+        <div id="payslip-content-wrapper">
+          <div class="payslip-sheet p-4 p-md-5" id="payslip-voucher" style="max-width: 860px; margin: 0 auto;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="payslip-empty-state" style="display: none; padding: 3rem;"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Change Password (Self) -->
+  <div class="modal-backdrop" id="change-password-modal">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Change Account Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('change-password-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form onsubmit="handlePasswordChangeSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="cp-current-pass">Current Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-current-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-new-pass">New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-new-pass" class="form-control" placeholder="Min 6 characters" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-confirm-pass">Confirm New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock-check" class="field-icon"></i>
+              <input type="password" id="cp-confirm-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('change-password-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="../js/storage.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/payslip.js"></script>
+
+  <script>
+    let activeUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      activeUser = requireRole('any');
+      if (!activeUser) return;
+
+      setupNavigationUser(activeUser);
+      renderSidebarForRole(activeUser.role);
+      initPeriodDropdown();
+      initEmployeeDropdown();
+      loadPayslipVoucher();
+
+      if (window.lucide) lucide.createIcons();
+    });
+
+    function renderSidebarForRole(role) {
+      const nav = document.getElementById('payslip-sidebar-nav');
+      if (!nav) return;
+
+      if (role === 'admin') {
+        nav.innerHTML = `
+          <div class="nav-section-label">Main Menu</div>
+          <a href="admin.html" class="nav-item">
+            <span>Dashboard</span>
+          </a>
+          <a href="employees.html" class="nav-item">
+            <span>Employees</span>
+          </a>
+          <a href="leaves.html" class="nav-item">
+            <span>Leave Requests</span>
+          </a>
+          <a href="payslip.html" class="nav-item is-active">
+            <span>Payroll & Slips</span>
+          </a>
+          <div class="nav-section-label mt-3">Administration</div>
+          <a href="settings.html" class="nav-item">
+            <span>Company Settings</span>
+          </a>
+        `;
+      } else {
+        nav.innerHTML = `
+          <div class="nav-section-label">Self Service</div>
+          <a href="employee.html" class="nav-item">
+            <span>My Attendance & Leaves</span>
+          </a>
+          <a href="payslip.html" class="nav-item is-active">
+            <span>My Monthly Payslip</span>
+          </a>
+        `;
+      }
+      if (window.lucide) lucide.createIcons();
+      if (typeof highlightActiveNav === 'function') highlightActiveNav();
+    }
+
+    function initPeriodDropdown() {
+      const select = document.getElementById('payslip-month-select');
+      if (!select) return;
+
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+      select.innerHTML = '';
+      for (let i = 0; i < 6; i++) {
+        let m = currentMonth - i;
+        let y = currentYear;
+        if (m < 0) {
+          m += 12;
+          y -= 1;
+        }
+        const opt = document.createElement('option');
+        opt.value = `${y}-${m}`;
+        opt.textContent = `${monthNames[m]} ${y}`;
+        if (i === 0) opt.selected = true;
+        select.appendChild(opt);
+      }
+    }
+
+    function initEmployeeDropdown() {
+      const select = document.getElementById('payslip-employee-select');
+      const badge = document.getElementById('payslip-role-badge');
+      if (!select) return;
+
+      const allUsers = getUsers();
+      const employees = allUsers.filter(u => u.role === 'employee');
+
+      if (activeUser.role !== 'admin') {
+        // Employee is locked to self
+        select.innerHTML = `<option value="${activeUser.id}">${escapeHtml(activeUser.name)} — ${escapeHtml(activeUser.designation || 'Staff')}</option>`;
+        select.disabled = true;
+        if (badge) {
+          badge.textContent = 'Employee';
+          badge.className = 'badge badge-teal';
+        }
+        return;
+      }
+
+      // Admin can pick any employee (or self)
+      select.innerHTML = '';
+      if (employees.length === 0) {
+        // Only admin exists
+        select.innerHTML = `<option value="${activeUser.id}">${escapeHtml(activeUser.name)} — Administrator</option>`;
+        if (badge) {
+          badge.textContent = 'Administrator';
+          badge.className = 'badge badge-purple';
+        }
+        return;
+      }
+
+      employees.forEach(emp => {
+        const opt = document.createElement('option');
+        opt.value = emp.id;
+        opt.textContent = `${emp.name} — ${emp.department || 'General'}`;
+        select.appendChild(opt);
+      });
+
+      // Also add admin
+      const adminOpt = document.createElement('option');
+      adminOpt.value = activeUser.id;
+      adminOpt.textContent = `${activeUser.name} — Administrator`;
+      select.appendChild(adminOpt);
+
+      updatePayslipRoleBadge();
+    }
+
+    function updatePayslipRoleBadge() {
+      const select = document.getElementById('payslip-employee-select');
+      const badge = document.getElementById('payslip-role-badge');
+      if (!select || !badge) return;
+      const allUsers = getUsers();
+      const selected = allUsers.find(u => u.id === select.value) || activeUser;
+      if (selected && selected.role === 'admin') {
+        badge.textContent = 'Administrator';
+        badge.className = 'badge badge-purple';
+      } else {
+        badge.textContent = 'Employee';
+        badge.className = 'badge badge-teal';
+      }
+    }
+
+    function loadPayslipVoucher() {
+      const empSelect = document.getElementById('payslip-employee-select');
+      const periodSelect = document.getElementById('payslip-month-select');
+      const voucher = document.getElementById('payslip-voucher');
+      const wrapper = document.getElementById('payslip-content-wrapper');
+      const emptyState = document.getElementById('payslip-empty-state');
+      const printBtn = document.getElementById('btn-print-payslip');
+
+      if (!empSelect || !periodSelect || !voucher) return;
+      updatePayslipRoleBadge();
+
+      const userId = empSelect.value;
+      if (!userId) {
+        if (wrapper) wrapper.style.display = 'none';
+        if (emptyState) {
+          emptyState.style.display = 'block';
+          renderEmptyState(emptyState, {
+            title: 'No Employee Selected',
+            message: 'Please onboard employees to generate payroll vouchers.'
+          });
+        }
+        if (printBtn) printBtn.disabled = true;
+        return;
+      }
+
+      const [yStr, mStr] = periodSelect.value.split('-');
+      const year = parseInt(yStr, 10);
+      const monthIndex = parseInt(mStr, 10);
+
+      const data = generatePayslipData(userId, year, monthIndex);
+      if (!data) return;
+
+      if (wrapper) wrapper.style.display = 'block';
+      if (emptyState) emptyState.style.display = 'none';
+      if (printBtn) printBtn.disabled = false;
+
+      const emp = data.employee;
+      const comp = data.company;
+      const stats = data.stats;
+      const pay = data.payroll;
+
+      const absentDeduction = Math.round(pay.perDayRate * stats.absent);
+      const halfDayDeduction = Math.round(pay.perDayRate * (0.5 * stats.halfDay));
+
+      const empLast4 = String(emp.id).slice(-4);
+      const slipNo = `PS-${year}-${String(monthIndex + 1).padStart(2, '0')}-${empLast4}`;
+
+      voucher.innerHTML = `
+        <!-- Voucher Header -->
+        <div class="payslip-header">
+          <div>
+            <h2 class="payslip-company-title">${escapeHtml(comp.name)}</h2>
+            <div class="payslip-sub">Official Monthly Salary Voucher &bull; Standard Payroll Record</div>
+          </div>
+          <div class="payslip-header-meta">
+            <span class="payslip-period-chip">Pay Period: ${data.period}</span>
+            <div class="payslip-meta-item">Generated: ${formatDate(todayStr())}</div>
+            <div class="payslip-meta-item">Slip No: ${slipNo}</div>
+          </div>
+        </div>
+
+        <!-- Employee Info Card -->
+        <div class="employee-info-card">
+          <div class="info-item">
+            <span class="info-label">Employee Name</span>
+            <span class="info-value">${escapeHtml(emp.name)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Employee ID</span>
+            <span class="info-value">${escapeHtml(emp.id)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Designation</span>
+            <span class="info-value">${escapeHtml(emp.designation || 'Staff')}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Department</span>
+            <span class="info-value">${escapeHtml(emp.department || 'General')}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Corporate Email</span>
+            <span class="info-value">${escapeHtml(emp.email)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Joining Date</span>
+            <span class="info-value">${formatDate(emp.joinDate)}</span>
+          </div>
+        </div>
+
+        <!-- Attendance Summary -->
+        <div>
+          <div class="attendance-section-title">Monthly Attendance Breakdown</div>
+          <div class="attendance-grid">
+            <div class="stat-tile neutral">
+              <span class="stat-tile-label">Working Days</span>
+              <div class="stat-tile-value">${stats.workingDaysInMonth}<span class="unit">days</span></div>
+            </div>
+            <div class="stat-tile teal">
+              <span class="stat-tile-label">Present</span>
+              <div class="stat-tile-value">${stats.present}<span class="unit">days</span></div>
+            </div>
+            <div class="stat-tile amber">
+              <span class="stat-tile-label">Late Days</span>
+              <div class="stat-tile-value">${stats.late}<span class="unit">days</span></div>
+            </div>
+            <div class="stat-tile purple">
+              <span class="stat-tile-label">Half Days</span>
+              <div class="stat-tile-value">${stats.halfDay}<span class="unit">days</span></div>
+            </div>
+            <div class="stat-tile blue">
+              <span class="stat-tile-label">Paid Leaves</span>
+              <div class="stat-tile-value">${stats.approvedLeaveDays}<span class="unit">days</span></div>
+            </div>
+            <div class="stat-tile red">
+              <span class="stat-tile-label">Absent Days</span>
+              <div class="stat-tile-value">${stats.absent}<span class="unit">days</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Earnings & Deductions Table -->
+        <table class="payslip-table">
+          <thead>
+            <tr>
+              <th style="text-align: left; width: 60%;">Description</th>
+              <th style="text-align: right; width: 40%;">Amount (PKR)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong style="color: var(--text);">Base Monthly Gross Salary</strong>
+              </td>
+              <td class="amount-num">${formatCurrency(emp.salary)}</td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 500;">Per-Day Rate</div>
+                <div class="formula-desc">Formula: ${formatCurrency(emp.salary)} / ${stats.workingDaysInMonth} working days</div>
+              </td>
+              <td class="amount-num">${formatCurrency(pay.perDayRate)} / day</td>
+            </tr>
+            <tr>
+              <th colspan="2" style="text-align: left; background: var(--surface-2);">Attendance Deductions</th>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 500;">Full Absent Days (${stats.absent} day${stats.absent !== 1 ? 's' : ''})</div>
+                <div class="formula-desc">${stats.absent} &times; ${formatCurrency(pay.perDayRate)}</div>
+              </td>
+              <td class="amount-num deduction-amount">
+                ${absentDeduction > 0 ? `-${formatCurrency(absentDeduction)}` : 'PKR 0'}
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 500;">Half-Day Penalty (${stats.halfDay} half-day${stats.halfDay !== 1 ? 's' : ''})</div>
+                <div class="formula-desc">${stats.halfDay} &times; 0.5 &times; ${formatCurrency(pay.perDayRate)}</div>
+              </td>
+              <td class="amount-num deduction-amount">
+                ${halfDayDeduction > 0 ? `-${formatCurrency(halfDayDeduction)}` : 'PKR 0'}
+              </td>
+            </tr>
+            <tr class="total-deductions-row">
+              <td>Total Payroll Deductions</td>
+              <td class="amount-num deduction-amount" style="font-weight: 700;">
+                ${pay.deduction > 0 ? `-${formatCurrency(pay.deduction)}` : 'PKR 0'}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Net Payable Box -->
+        <div class="net-payable-box">
+          <div class="net-payable-label">NET PAYABLE SALARY</div>
+          <div class="net-payable-amount">${formatCurrency(pay.netSalary)}</div>
+        </div>
+
+        <!-- Amount in Words -->
+        <div class="amount-words">
+          <div class="words-content">
+            <span class="words-label">Amount in Words</span>
+            <span class="words-value">${escapeHtml(data.amountInWords)}</span>
+          </div>
+          <div class="words-chip">${formatCurrency(pay.netSalary)}</div>
+        </div>
+
+        <!-- Signatures & Notice -->
+        <div class="payslip-signatures">
+          <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-title">Employee Signature</div>
+            <div class="signature-sub">${escapeHtml(emp.name)}</div>
+          </div>
+          <div class="signature-box">
+            <div class="signature-line"></div>
+            <div class="signature-title">Authorized Signatory</div>
+            <div class="signature-sub">${escapeHtml(comp.name)}</div>
+          </div>
+        </div>
+        <div class="payslip-notice">This is a system-generated payslip.</div>
+      `;
+
+      if (window.lucide) lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - HCM Lite</title>
+  <meta name="description" content="HCM Lite Administrator Dashboard. Live attendance metrics, staff oversight, leave approvals, and workforce analytics.">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Mobile Sidebar Overlay Backdrop -->
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- Fixed Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-text-logo">
+          <span class="brand-hcm">HCM</span><span class="brand-lite">Lite</span>
+        </div>
+        <span class="sidebar-company-name">Organization</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main Menu</div>
+        <a href="admin.html" class="nav-item is-active">
+          <span>Dashboard</span>
+        </a>
+        <a href="employees.html" class="nav-item">
+          <span>Employees</span>
+        </a>
+        <a href="leaves.html" class="nav-item">
+          <span>Leave Requests</span>
+        </a>
+        <a href="payslip.html" class="nav-item">
+          <span>Payroll & Slips</span>
+        </a>
+
+        <div class="nav-section-label mt-3">Administration</div>
+        <a href="settings.html" class="nav-item">
+          <span>Company Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-signout-btn" onclick="logout('../index.html')">
+          <i data-lucide="log-out"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Application Header -->
+      <header class="top-header">
+        <div class="topbar-left">
+          <button class="btn btn-secondary btn-icon mobile-nav-toggle hide-desktop" aria-label="Toggle Navigation Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <h1 class="header-title" style="font-size: 1.25rem; font-weight: 700; margin: 0;">Executive Overview</h1>
+            <span class="hide-mobile" style="font-size: 0.8rem; color: var(--text-muted);">Real-time workforce attendance, leave pipeline, and departmental metrics</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="date-chip hide-mobile">
+            <i data-lucide="calendar"></i>
+            <span id="top-header-date">Today</span>
+          </div>
+
+          <button class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">
+            <i data-lucide="moon"></i>
+          </button>
+
+          <!-- User Menu -->
+          <div class="dropdown-wrapper">
+            <button class="profile-pill" onclick="openChangePasswordModal()" aria-label="User profile and settings">
+              <div class="avatar avatar-teal nav-user-avatar">AD</div>
+              <div class="profile-pill-info hide-mobile">
+                <div class="nav-user-name">Admin</div>
+                <div class="nav-user-role">Administrator</div>
+              </div>
+              <i data-lucide="key-round" title="Change Password"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content Body -->
+      <main class="page-body" style="max-width: 1440px; margin: 0 auto; width: 100%;">
+        
+        <!-- A) Hero Banner -->
+        <div class="admin-hero-banner" id="admin-hero-banner">
+          <div class="hero-blur-circle-1"></div>
+          <div class="hero-blur-circle-2"></div>
+          
+          <div class="hero-left-content">
+            <div class="hero-chip">
+              <span class="hero-chip-dot"></span>
+              <span>Admin Console</span>
+            </div>
+            <h1 class="hero-greeting" id="hero-admin-greeting">Good morning, Admin 👋</h1>
+            <div class="hero-subtitle">
+              <span id="hero-company-name">Our Organization</span> &bull; 
+              <span id="hero-current-date">Sunday, 25 October 2026</span>
+            </div>
+            <div class="hero-summary-pill" id="hero-summary-status">
+              <i data-lucide="info" style="width: 14px; height: 14px;"></i>
+              <span id="hero-summary-text">Everything is on track</span>
+            </div>
+          </div>
+
+          <div class="hero-right-actions">
+            <div class="hero-clock-box">
+              <div class="hero-clock-time" id="hero-live-clock">--:--:--</div>
+              <div class="hero-clock-date">Live PKT Time</div>
+            </div>
+            <div class="hero-glass-buttons">
+              <a href="employees.html" class="hero-glass-btn">
+                <i data-lucide="user-plus" style="width: 15px; height: 15px;"></i>
+                <span>Add Employee</span>
+              </a>
+              <a href="leaves.html" class="hero-glass-btn">
+                <i data-lucide="calendar-check" style="width: 15px; height: 15px;"></i>
+                <span>Review Leaves</span>
+              </a>
+              <a href="settings.html" class="hero-glass-btn">
+                <i data-lucide="settings" style="width: 15px; height: 15px;"></i>
+                <span>Settings</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- E) Getting Started Checklist (Auto-ticks & auto-hides when complete) -->
+        <div class="onboarding-checklist-card" id="getting-started-checklist" style="display: none;">
+          <div class="checklist-header">
+            <div class="checklist-title">
+              <i data-lucide="list-checks" style="color: var(--primary); width: 20px; height: 20px;"></i>
+              <span>Getting Started with HCM Lite</span>
+            </div>
+            <span class="checklist-badge" id="checklist-progress-badge">0 of 5 Completed</span>
+          </div>
+          <div class="checklist-steps-grid">
+            <a href="settings.html" class="checklist-step" id="check-step-company">
+              <div class="checklist-step-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+              <div class="checklist-step-text">Company Setup</div>
+            </a>
+            <a href="settings.html" class="checklist-step" id="check-step-rules">
+              <div class="checklist-step-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+              <div class="checklist-step-text">Attendance Rules</div>
+            </a>
+            <a href="employees.html" class="checklist-step" id="check-step-employee">
+              <div class="checklist-step-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+              <div class="checklist-step-text">Add 1st Employee</div>
+            </a>
+            <a href="employees.html" class="checklist-step" id="check-step-attendance">
+              <div class="checklist-step-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+              <div class="checklist-step-text">First Check-in</div>
+            </a>
+            <a href="leaves.html" class="checklist-step" id="check-step-leave">
+              <div class="checklist-step-icon"><i data-lucide="check" style="width: 14px; height: 14px;"></i></div>
+              <div class="checklist-step-text">Approve a Leave</div>
+            </a>
+          </div>
+        </div>
+
+        <!-- B) KPI Row (4 Primary Cards with Lift, Gradient Bubble, Big Count, Sparkline & Pills) -->
+        <div class="kpi-grid">
+          <!-- Total Employees -->
+          <div class="kpi-card">
+            <div class="kpi-card-header">
+              <div class="kpi-icon-bubble kpi-icon-blue">
+                <i data-lucide="users"></i>
+              </div>
+              <svg class="kpi-sparkline" viewBox="0 0 80 32" fill="none">
+                <path d="M2 28 Q 20 18, 40 22 T 78 6" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="kpi-value" id="stat-total-emp">0</div>
+            <div class="kpi-label">Total Employees</div>
+            <div class="kpi-footer">
+              <span class="kpi-pill neutral" id="kpi-emp-sub">Active Onboarded</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Organization</span>
+            </div>
+          </div>
+
+          <!-- Present Today -->
+          <div class="kpi-card">
+            <div class="kpi-card-header">
+              <div class="kpi-icon-bubble kpi-icon-teal">
+                <i data-lucide="user-check"></i>
+              </div>
+              <svg class="kpi-sparkline" viewBox="0 0 80 32" fill="none">
+                <path d="M2 26 Q 25 24, 45 14 T 78 4" stroke="#0F9D8A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="kpi-value text-teal" id="stat-present-today">0</div>
+            <div class="kpi-label">Present Today</div>
+            <div class="kpi-footer">
+              <span class="kpi-pill positive" id="kpi-present-rate">0% Attendance</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">On Duty</span>
+            </div>
+          </div>
+
+          <!-- On Leave Today -->
+          <div class="kpi-card">
+            <div class="kpi-card-header">
+              <div class="kpi-icon-bubble kpi-icon-purple">
+                <i data-lucide="palmtree"></i>
+              </div>
+              <svg class="kpi-sparkline" viewBox="0 0 80 32" fill="none">
+                <path d="M2 16 Q 25 18, 50 16 T 78 16" stroke="#5B4FCF" stroke-width="2" stroke-dasharray="3,3" fill="none"/>
+              </svg>
+            </div>
+            <div class="kpi-value text-purple" id="stat-on-leave-today">0</div>
+            <div class="kpi-label">On Leave Today</div>
+            <div class="kpi-footer">
+              <span class="kpi-pill neutral" id="kpi-leave-sub">0 Pending Review</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">Authorized</span>
+            </div>
+          </div>
+
+          <!-- Late Arrivals -->
+          <div class="kpi-card">
+            <div class="kpi-card-header">
+              <div class="kpi-icon-bubble kpi-icon-amber">
+                <i data-lucide="clock"></i>
+              </div>
+              <svg class="kpi-sparkline" viewBox="0 0 80 32" fill="none">
+                <path d="M2 24 Q 25 20, 50 10 T 78 18" stroke="#F0962B" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="kpi-value text-amber" id="stat-late-today">0</div>
+            <div class="kpi-label">Late Today</div>
+            <div class="kpi-footer">
+              <span class="kpi-pill warning" id="kpi-late-sub">Past Grace Time</span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">After Shift</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Secondary KPI Strip -->
+        <div class="kpi-secondary-strip">
+          <div class="kpi-strip-item">
+            <div>
+              <div class="kpi-strip-label">Absent Today</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Unaccounted</div>
+            </div>
+            <div class="kpi-strip-num text-danger" id="stat-absent-today">0</div>
+          </div>
+          <div class="kpi-strip-item">
+            <div>
+              <div class="kpi-strip-label">Pending Leaves</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Awaiting Decision</div>
+            </div>
+            <div class="kpi-strip-num text-purple" id="stat-pending-leaves">0</div>
+          </div>
+          <div class="kpi-strip-item">
+            <div>
+              <div class="kpi-strip-label">Half Days</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Early / Partial</div>
+            </div>
+            <div class="kpi-strip-num text-amber" id="stat-half-days">0</div>
+          </div>
+          <div class="kpi-strip-item">
+            <div>
+              <div class="kpi-strip-label">Attendance Rate</div>
+              <div class="mini-progress-track">
+                <div class="mini-progress-fill" id="mini-attendance-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="kpi-strip-num text-teal" id="stat-attendance-rate">0%</div>
+          </div>
+        </div>
+
+        <!-- C) Charts Row (Grid 2fr 1fr) -->
+        <div class="row g-4 mb-4">
+          <!-- Attendance Overview Area Chart with Segmented Tabs -->
+          <div class="col-lg-8">
+            <div class="card p-4" style="height: 100%;">
+              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div>
+                  <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="trending-up" style="color: var(--primary); width: 18px; height: 18px;"></i>
+                    <span>Attendance Overview</span>
+                  </h3>
+                  <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Daily presence vs late arrivals across the organization</div>
+                </div>
+                <div class="segmented-tabs">
+                  <button type="button" class="segmented-tab active" id="tab-chart-7d" onclick="switchChartRange(7)">7 Days</button>
+                  <button type="button" class="segmented-tab" id="tab-chart-30d" onclick="switchChartRange(30)">30 Days</button>
+                </div>
+              </div>
+
+              <!-- Chart Canvas Container -->
+              <div style="height: 270px; position: relative;" id="trend-chart-wrapper">
+                <canvas id="trendLineChart"></canvas>
+              </div>
+
+              <!-- Empty State for Chart -->
+              <div id="chart-empty-state" class="empty-state-card" style="display: none; height: 270px;">
+                <div class="empty-state-icon">
+                  <i data-lucide="bar-chart-2"></i>
+                </div>
+                <div class="empty-state-title">No Attendance Recorded Yet</div>
+                <div class="empty-state-desc">Attendance curves will automatically visualize here once employees punch in.</div>
+                <a href="employees.html" class="btn btn-primary btn-sm">
+                  <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+                  <span>Add First Employee</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Split Donut Chart -->
+          <div class="col-lg-4">
+            <div class="card p-4" style="height: 100%;">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.45rem;">
+                    <i data-lucide="pie-chart" style="color: var(--accent); width: 18px; height: 18px;"></i>
+                    <span>Today's Split</span>
+                  </h3>
+                  <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">Live distribution of workforce</div>
+                </div>
+                <span class="badge badge-teal" style="font-size: 0.7rem;">Today</span>
+              </div>
+
+              <div class="donut-center-container" style="height: 190px;" id="donut-chart-wrapper">
+                <canvas id="todaySplitChart"></canvas>
+                <div class="donut-center-label">
+                  <div class="donut-center-num" id="donut-center-total">0</div>
+                  <div class="donut-center-sub">Staff</div>
+                </div>
+              </div>
+
+              <!-- Donut Empty State -->
+              <div id="donut-empty-state" class="empty-state-card" style="display: none; height: 190px; padding: 1.5rem;">
+                <div class="empty-state-icon" style="width: 44px; height: 44px; margin-bottom: 0.5rem;">
+                  <i data-lucide="users" style="width: 22px; height: 22px;"></i>
+                </div>
+                <div class="empty-state-title" style="font-size: 0.95rem;">No Active Staff</div>
+                <div class="empty-state-desc" style="font-size: 0.78rem; margin-bottom: 0;">Onboard staff members to view today's split.</div>
+              </div>
+
+              <!-- Donut Legend Grid -->
+              <div class="row g-2 mt-2 pt-2" style="border-top: 1px solid var(--border);">
+                <div class="col-6">
+                  <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background: var(--surface-2); font-size: 0.78rem;">
+                    <span class="d-flex align-items-center gap-1">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #0F9D8A;"></span>
+                      <span>Present</span>
+                    </span>
+                    <strong id="donut-legend-present">0</strong>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background: var(--surface-2); font-size: 0.78rem;">
+                    <span class="d-flex align-items-center gap-1">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #F0962B;"></span>
+                      <span>Late</span>
+                    </span>
+                    <strong id="donut-legend-late">0</strong>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background: var(--surface-2); font-size: 0.78rem;">
+                    <span class="d-flex align-items-center gap-1">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #5B4FCF;"></span>
+                      <span>On Leave</span>
+                    </span>
+                    <strong id="donut-legend-leave">0</strong>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background: var(--surface-2); font-size: 0.78rem;">
+                    <span class="d-flex align-items-center gap-1">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #E5484D;"></span>
+                      <span>Absent</span>
+                    </span>
+                    <strong id="donut-legend-absent">0</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- D) Two-Column Row (Grid 1.5fr 1fr) -->
+        <div class="row g-4 mb-4">
+          <!-- Left: Today's Attendance Table with Search -->
+          <div class="col-lg-8">
+            <div class="card" style="height: 100%;">
+              <div class="card-header d-flex justify-content-between align-items-center p-3 flex-wrap gap-2" style="border-bottom: 1px solid var(--border);">
+                <div class="d-flex align-items-center gap-2">
+                  <i data-lucide="calendar-check-2" style="color: var(--primary); width: 18px; height: 18px;"></i>
+                  <h3 style="font-size: 1rem; font-weight: 800; margin: 0;">Today's Attendance Roster</h3>
+                  <span class="badge badge-teal" id="roster-date-badge">Today</span>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="input-with-icon" style="width: 190px;">
+                    <i data-lucide="search" class="field-icon" style="width: 14px; height: 14px;"></i>
+                    <input type="text" id="roster-search-input" class="form-control" placeholder="Search staff..." style="padding: 0.35rem 0.65rem 0.35rem 2.2rem; font-size: 0.8rem;">
+                  </div>
+                  <button class="btn btn-secondary btn-sm" onclick="exportAttendanceToCSV()" title="Export CSV" style="padding: 0.35rem 0.65rem;">
+                    <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div id="roster-table-container">
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Employee</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Logged Hours</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="roster-table-body">
+                      <!-- Rendered dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Empty State for Roster -->
+              <div id="roster-empty-state" class="empty-state-card m-3" style="display: none;">
+                <div class="empty-state-icon">
+                  <i data-lucide="users"></i>
+                </div>
+                <div class="empty-state-title" id="roster-empty-title">No Staff Members Found</div>
+                <div class="empty-state-desc" id="roster-empty-desc">You have not added any employees to your organization yet.</div>
+                <a href="employees.html" class="btn btn-primary btn-sm">
+                  <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+                  <span>Add First Employee</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Stacked Cards (Pending Leaves, Announcements, Department Headcount) -->
+          <div class="col-lg-4 d-flex flex-column gap-4">
+            
+            <!-- 1. Pending Leave Requests -->
+            <div class="card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.45rem;">
+                  <i data-lucide="clock" style="color: var(--warning); width: 17px; height: 17px;"></i>
+                  <span>Pending Leave Requests</span>
+                </h3>
+                <a href="leaves.html" style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">View All &rarr;</a>
+              </div>
+              
+              <div id="quick-pending-leaves-list" class="d-flex flex-column gap-2">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- 2. Broadcast Announcements with Composer -->
+            <div class="card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.45rem;">
+                  <i data-lucide="megaphone" style="color: var(--accent); width: 17px; height: 17px;"></i>
+                  <span>Broadcast Announcements</span>
+                </h3>
+                <button class="btn btn-secondary btn-sm" onclick="openModal('announcement-modal')" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+                  + Post
+                </button>
+              </div>
+              <div id="admin-announcements-feed" class="d-flex flex-column gap-2">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- 3. Department Headcount Progress Bars -->
+            <div class="card p-3">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 0.45rem;">
+                  <i data-lucide="building-2" style="color: #2563EB; width: 17px; height: 17px;"></i>
+                  <span>Department Headcount</span>
+                </h3>
+                <span class="badge badge-neutral" id="dept-count-badge" style="font-size: 0.7rem;">0 Departments</span>
+              </div>
+              <div id="dept-headcount-container">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Smart Helper Floating AI Widget -->
+  <button class="helper-launcher" id="smart-helper-launcher" aria-label="Open HCM Lite Smart Assistant">
+    <div class="helper-badge-ping"></div>
+    <i data-lucide="bot" style="width: 26px; height: 26px; color: #fff;"></i>
+  </button>
+
+  <div class="helper-window" id="smart-helper-window">
+    <div class="helper-header">
+      <div class="helper-header-info">
+        <div class="helper-avatar">
+          <i data-lucide="bot" style="width: 20px; height: 20px;"></i>
+        </div>
+        <div>
+          <div class="helper-title">HCM Smart Helper</div>
+          <div class="helper-subtitle">Workforce Intelligence &bull; Active</div>
+        </div>
+      </div>
+      <button class="helper-close-btn" id="smart-helper-close" aria-label="Close Assistant">
+        <i data-lucide="x" style="width: 18px; height: 18px; color: #fff;"></i>
+      </button>
+    </div>
+
+    <div class="helper-messages" id="smart-helper-messages">
+      <div class="helper-bubble helper-bubble-bot">
+        <div class="helper-bubble-bot-avatar">
+          <i data-lucide="bot" style="width: 14px; height: 14px;"></i>
+        </div>
+        <div class="helper-bubble-content">
+          Hello! I am your Administrator Smart Assistant. You can ask me real-time workforce queries, who is on leave, late arrivals, headcount, or company policies.
+        </div>
+      </div>
+    </div>
+
+    <div class="helper-chips" id="smart-helper-chips">
+      <!-- Generated dynamically -->
+    </div>
+
+    <div class="helper-input-area">
+      <input type="text" id="smart-helper-input" placeholder="Ask workforce questions..." autocomplete="off">
+      <button class="helper-send-btn" id="smart-helper-send" aria-label="Send query">
+        <i data-lucide="send" style="width: 16px; height: 16px; color: #fff;"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Post Announcement -->
+  <div class="modal-backdrop" id="announcement-modal">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Broadcast Organization Announcement</h3>
+        <button class="modal-close-btn" onclick="closeModal('announcement-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form onsubmit="handlePostAnnouncement(event)">
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label class="form-label" for="ann-title">Announcement Headline *</label>
+            <input type="text" id="ann-title" class="form-control" placeholder="e.g. Annual Company Offsite Schedule" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ann-message">Message Details *</label>
+            <textarea id="ann-message" class="form-control" rows="4" placeholder="Enter announcement text for all team members..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('announcement-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i data-lucide="send" style="width: 15px; height: 15px;"></i>
+            <span>Publish Broadcast</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Approve / Reject Leave with Comment -->
+  <div class="modal-backdrop" id="leave-review-modal">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Review Leave Application</h3>
+        <button class="modal-close-btn" onclick="closeModal('leave-review-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="leave-review-details">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('leave-review-modal')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="submitLeaveDecision('rejected')">
+          <i data-lucide="x" style="width: 15px; height: 15px;"></i>
+          <span>Reject</span>
+        </button>
+        <button type="button" class="btn btn-primary" onclick="submitLeaveDecision('approved')">
+          <i data-lucide="check" style="width: 15px; height: 15px;"></i>
+          <span>Approve Leave</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Change Password (Self) -->
+  <div class="modal-backdrop" id="change-password-modal">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Change Account Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('change-password-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form onsubmit="handlePasswordChangeSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="cp-current-pass">Current Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-current-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-new-pass">New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-new-pass" class="form-control" placeholder="Min 6 characters" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-confirm-pass">Confirm New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock-check" class="field-icon"></i>
+              <input type="password" id="cp-confirm-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('change-password-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="../js/storage.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/attendance.js"></script>
+  <script src="../js/helper.js"></script>
+
+  <script>
+    let reviewingLeaveId = null;
+    let trendChartInstance = null;
+    let todaySplitChartInstance = null;
+    let currentChartDays = 7;
+    let cachedEmployees = [];
+    let cachedAttendance = [];
+    let cachedLeaves = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const admin = requireRole('admin');
+      if (!admin) return;
+
+      setupNavigationUser(admin);
+      startLiveClock();
+      loadAdminDashboard();
+      initSmartHelper();
+
+      // Search filter for Today's Attendance Table
+      const searchInput = document.getElementById('roster-search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          filterRosterTable(e.target.value.toLowerCase().trim());
+        });
+      }
+
+      // Refresh Chart.js and UI on theme toggle
+      window.addEventListener('themechanged', () => {
+        loadAdminDashboard();
+      });
+
+      if (window.lucide) lucide.createIcons();
+    });
+
+    // 1. Live PKT Clock for Hero Banner
+    function startLiveClock() {
+      const clockEl = document.getElementById('hero-live-clock');
+      function update() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (clockEl) clockEl.textContent = timeStr;
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // 2. Chart Range Switcher (7 Days vs 30 Days)
+    function switchChartRange(days) {
+      currentChartDays = days;
+      const tab7 = document.getElementById('tab-chart-7d');
+      const tab30 = document.getElementById('tab-chart-30d');
+      if (tab7 && tab30) {
+        if (days === 7) {
+          tab7.classList.add('active');
+          tab30.classList.remove('active');
+        } else {
+          tab30.classList.add('active');
+          tab7.classList.remove('active');
+        }
+      }
+      const allAttendance = getAttendance();
+      renderTrendChart(allAttendance, days);
+    }
+
+    // 3. Main Dashboard Loader
+    function loadAdminDashboard() {
+      const company = getCompany() || {
+        name: 'Our Organization',
+        officeStart: '09:00',
+        graceMinutes: 15,
+        yearlyLeaveQuota: 20,
+        workingDays: [1, 2, 3, 4, 5]
+      };
+
+      const adminUser = getCurrentUser() || { name: 'Admin' };
+      const firstName = adminUser.name ? adminUser.name.split(' ')[0] : 'Admin';
+      const now = new Date();
+      const currentHour = now.getHours();
+      let greetingTime = 'Good morning';
+      if (currentHour >= 12 && currentHour < 17) greetingTime = 'Good afternoon';
+      else if (currentHour >= 17) greetingTime = 'Good evening';
+
+      // Update Hero Elements
+      const greetingEl = document.getElementById('hero-admin-greeting');
+      if (greetingEl) greetingEl.textContent = `${greetingTime}, ${firstName} 👋`;
+
+      const compEl = document.getElementById('hero-company-name');
+      if (compEl) compEl.textContent = company.name;
+
+      const dateEl = document.getElementById('hero-current-date');
+      if (dateEl) {
+        const opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('en-US', opts);
+      }
+
+      const today = todayStr();
+      const allUsers = getUsers();
+      const employees = allUsers.filter(u => u.role === 'employee');
+      const allAttendance = getAttendance();
+      const todayAttendance = allAttendance.filter(a => a.date === today);
+      const allLeaves = getLeaves();
+      const todayLeaves = allLeaves.filter(l => l.status === 'approved' && today >= l.from && today <= l.to);
+      const pendingLeaves = allLeaves.filter(l => l.status === 'pending');
+
+      cachedEmployees = employees;
+      cachedAttendance = todayAttendance;
+      cachedLeaves = todayLeaves;
+
+      // Metric calculations
+      const totalEmp = employees.length;
+      const presentCount = todayAttendance.length;
+      const lateCount = todayAttendance.filter(a => a.status === 'late' || a.late).length;
+      const onLeaveCount = todayLeaves.length;
+      const halfDayCount = todayAttendance.filter(a => a.status === 'half_day').length;
+      const absentCount = Math.max(0, totalEmp - (presentCount + onLeaveCount));
+      const attRate = totalEmp > 0 ? Math.round((presentCount / totalEmp) * 100) : 0;
+
+      // Hero Summary Pill
+      const summaryText = document.getElementById('hero-summary-text');
+      if (summaryText) {
+        if (pendingLeaves.length > 0) {
+          summaryText.textContent = `${pendingLeaves.length} pending leave${pendingLeaves.length > 1 ? 's' : ''} need your review`;
+        } else if (absentCount > 0 && totalEmp > 0) {
+          summaryText.textContent = `${absentCount} employee${absentCount > 1 ? 's' : ''} absent today · Shift active`;
+        } else {
+          summaryText.textContent = 'All workforce metrics on track';
+        }
+      }
+
+      // Animate Primary KPI counters
+      animateValue(document.getElementById('stat-total-emp'), 0, totalEmp);
+      animateValue(document.getElementById('stat-present-today'), 0, presentCount);
+      animateValue(document.getElementById('stat-late-today'), 0, lateCount);
+      animateValue(document.getElementById('stat-on-leave-today'), 0, onLeaveCount);
+
+      // Sub-pills
+      const empSub = document.getElementById('kpi-emp-sub');
+      if (empSub) empSub.textContent = totalEmp > 0 ? `${totalEmp} Active Staff` : 'No staff yet';
+
+      const presentRatePill = document.getElementById('kpi-present-rate');
+      if (presentRatePill) presentRatePill.textContent = `${attRate}% Attendance`;
+
+      const leaveSub = document.getElementById('kpi-leave-sub');
+      if (leaveSub) leaveSub.textContent = `${pendingLeaves.length} Pending Review`;
+
+      const lateSub = document.getElementById('kpi-late-sub');
+      if (lateSub) lateSub.textContent = lateCount > 0 ? `${lateCount} after grace time` : 'All on time';
+
+      // Secondary Strip counters
+      const absentEl = document.getElementById('stat-absent-today');
+      if (absentEl) absentEl.textContent = absentCount;
+
+      const pendLeavesEl = document.getElementById('stat-pending-leaves');
+      if (pendLeavesEl) pendLeavesEl.textContent = pendingLeaves.length;
+
+      const halfDayEl = document.getElementById('stat-half-days');
+      if (halfDayEl) halfDayEl.textContent = halfDayCount;
+
+      const attRateEl = document.getElementById('stat-attendance-rate');
+      if (attRateEl) attRateEl.textContent = `${attRate}%`;
+
+      const attFill = document.getElementById('mini-attendance-fill');
+      if (attFill) attFill.style.width = `${attRate}%`;
+
+      // Getting Started Checklist
+      renderChecklist(company, employees, allAttendance, allLeaves);
+
+      // Date Badges
+      const rosterBadge = document.getElementById('roster-date-badge');
+      if (rosterBadge) rosterBadge.textContent = formatDate(today, true);
+
+      // Render Modules
+      renderTodayRoster(employees, todayAttendance, todayLeaves);
+      renderQuickPendingLeaves(pendingLeaves);
+      renderAnnouncementsFeed();
+      renderDeptHeadcount(employees);
+
+      // Render Charts
+      renderTrendChart(allAttendance, currentChartDays);
+      renderTodaySplitDonut(presentCount, lateCount, onLeaveCount, absentCount, totalEmp);
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // 4. Getting Started Checklist
+    function renderChecklist(company, employees, allAttendance, allLeaves) {
+      const card = document.getElementById('getting-started-checklist');
+      if (!card) return;
+
+      const sCompany = !!company && !!company.name;
+      const sRules = !!company && Array.isArray(company.workingDays) && company.workingDays.length > 0;
+      const sEmployee = employees.length > 0;
+      const sAttendance = allAttendance.length > 0;
+      const sLeave = allLeaves.some(l => l.status === 'approved');
+
+      const steps = [sCompany, sRules, sEmployee, sAttendance, sLeave];
+      const completedCount = steps.filter(Boolean).length;
+
+      // Update badge
+      const badge = document.getElementById('checklist-progress-badge');
+      if (badge) badge.textContent = `${completedCount} of 5 Completed`;
+
+      function setStep(id, isDone) {
+        const el = document.getElementById(id);
+        if (el) {
+          if (isDone) el.classList.add('completed');
+          else el.classList.remove('completed');
+        }
+      }
+
+      setStep('check-step-company', sCompany);
+      setStep('check-step-rules', sRules);
+      setStep('check-step-employee', sEmployee);
+      setStep('check-step-attendance', sAttendance);
+      setStep('check-step-leave', sLeave);
+
+      // If all 5 completed, hide checklist to keep clean dashboard
+      if (completedCount === 5) {
+        card.style.display = 'none';
+      } else {
+        card.style.display = 'block';
+      }
+    }
+
+    // 5. Trend Line/Area Chart (7 Days vs 30 Days)
+    function renderTrendChart(allAttendance, daysCount) {
+      if (typeof Chart === 'undefined') return;
+
+      const chartWrapper = document.getElementById('trend-chart-wrapper');
+      const emptyState = document.getElementById('chart-empty-state');
+      const ctxLine = document.getElementById('trendLineChart');
+      if (!ctxLine) return;
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDark ? '#9AA7C7' : '#6B7690';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(31, 42, 68, 0.06)';
+      const legendColor = isDark ? '#EAF0FF' : '#1F2A44';
+
+      const dates = [];
+      const presentCounts = [];
+      const lateCounts = [];
+
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${y}-${m}-${day}`;
+
+        if (daysCount <= 7) {
+          dates.push(d.toLocaleDateString('en-US', { weekday: 'short', month: 'numeric', day: 'numeric' }));
+        } else {
+          dates.push(d.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }));
+        }
+
+        const dayRecords = allAttendance.filter(a => a.date === dateStr);
+        presentCounts.push(dayRecords.length);
+        lateCounts.push(dayRecords.filter(a => a.status === 'late' || a.late).length);
+      }
+
+      const totalPresenceInPeriod = presentCounts.reduce((a, b) => a + b, 0);
+
+      // If empty data
+      if (totalPresenceInPeriod === 0 && allAttendance.length === 0) {
+        if (chartWrapper) chartWrapper.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'flex';
+        return;
+      }
+
+      if (chartWrapper) chartWrapper.style.display = 'block';
+      if (emptyState) emptyState.style.display = 'none';
+
+      if (trendChartInstance) trendChartInstance.destroy();
+
+      trendChartInstance = new Chart(ctxLine, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Present Staff',
+              data: presentCounts,
+              borderColor: '#0F9D8A',
+              backgroundColor: isDark ? 'rgba(15, 157, 138, 0.22)' : 'rgba(15, 157, 138, 0.12)',
+              tension: 0.38,
+              fill: true,
+              pointBackgroundColor: '#0F9D8A',
+              pointBorderColor: '#FFFFFF',
+              pointRadius: daysCount > 14 ? 2 : 4,
+              pointHoverRadius: 6,
+              borderWidth: 2.5
+            },
+            {
+              label: 'Late Arrivals',
+              data: lateCounts,
+              borderColor: '#F0962B',
+              backgroundColor: isDark ? 'rgba(240, 150, 43, 0.22)' : 'rgba(240, 150, 43, 0.1)',
+              tension: 0.38,
+              fill: true,
+              pointBackgroundColor: '#F0962B',
+              pointBorderColor: '#FFFFFF',
+              pointRadius: daysCount > 14 ? 2 : 4,
+              pointHoverRadius: 6,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          scales: {
+            x: {
+              grid: { color: gridColor },
+              ticks: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 11 } }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: { color: textColor, precision: 0, font: { family: 'Plus Jakarta Sans', size: 11 } }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { boxWidth: 12, color: legendColor, font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 } }
+            },
+            tooltip: {
+              backgroundColor: isDark ? '#1D2740' : '#FFFFFF',
+              titleColor: isDark ? '#EAF0FF' : '#1F2A44',
+              bodyColor: isDark ? '#9AA7C7' : '#6B7690',
+              borderColor: isDark ? '#2F3B5C' : '#E5E9F2',
+              borderWidth: 1,
+              padding: 10,
+              boxPadding: 4,
+              usePointStyle: true
+            }
+          }
+        }
+      });
+    }
+
+    // 6. Today's Split Donut Chart
+    function renderTodaySplitDonut(present, late, leave, absent, totalStaff) {
+      if (typeof Chart === 'undefined') return;
+
+      const donutWrapper = document.getElementById('donut-chart-wrapper');
+      const emptyState = document.getElementById('donut-empty-state');
+      const ctxDonut = document.getElementById('todaySplitChart');
+      if (!ctxDonut) return;
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      // Update center label
+      const totalLabel = document.getElementById('donut-center-total');
+      if (totalLabel) totalLabel.textContent = totalStaff;
+
+      // Update legend counts
+      const legPresent = document.getElementById('donut-legend-present');
+      if (legPresent) legPresent.textContent = present;
+
+      const legLate = document.getElementById('donut-legend-late');
+      if (legLate) legLate.textContent = late;
+
+      const legLeave = document.getElementById('donut-legend-leave');
+      if (legLeave) legLeave.textContent = leave;
+
+      const legAbsent = document.getElementById('donut-legend-absent');
+      if (legAbsent) legAbsent.textContent = absent;
+
+      if (totalStaff === 0) {
+        if (donutWrapper) donutWrapper.style.display = 'none';
+        if (emptyState) emptyState.style.display = 'flex';
+        return;
+      }
+
+      if (donutWrapper) donutWrapper.style.display = 'flex';
+      if (emptyState) emptyState.style.display = 'none';
+
+      if (todaySplitChartInstance) todaySplitChartInstance.destroy();
+
+      todaySplitChartInstance = new Chart(ctxDonut, {
+        type: 'doughnut',
+        data: {
+          labels: ['Present', 'Late', 'On Leave', 'Absent'],
+          datasets: [{
+            data: [present, late, leave, absent],
+            backgroundColor: ['#0F9D8A', '#F0962B', '#5B4FCF', '#E5484D'],
+            borderWidth: 2,
+            borderColor: isDark ? '#1D2740' : '#FFFFFF',
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '74%',
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: isDark ? '#1D2740' : '#FFFFFF',
+              titleColor: isDark ? '#EAF0FF' : '#1F2A44',
+              bodyColor: isDark ? '#9AA7C7' : '#6B7690',
+              borderColor: isDark ? '#2F3B5C' : '#E5E9F2',
+              borderWidth: 1,
+              padding: 8
+            }
+          }
+        }
+      });
+    }
+
+    // 7. Today's Attendance Roster & Search Filter
+    function renderTodayRoster(employees, todayAttendance, todayLeaves, filterQuery = '') {
+      const tbody = document.getElementById('roster-table-body');
+      const container = document.getElementById('roster-table-container');
+      const emptyContainer = document.getElementById('roster-empty-state');
+      if (!tbody) return;
+
+      if (employees.length === 0) {
+        if (container) container.style.display = 'none';
+        if (emptyContainer) {
+          emptyContainer.style.display = 'flex';
+          const titleEl = document.getElementById('roster-empty-title');
+          const descEl = document.getElementById('roster-empty-desc');
+          if (titleEl) titleEl.textContent = 'No Employees in Organization';
+          if (descEl) descEl.textContent = 'You have not onboarded any staff members yet. Add employees to start logging attendance.';
+        }
+        return;
+      }
+
+      const leaveUserMap = {};
+      todayLeaves.forEach(l => { leaveUserMap[l.userId] = l; });
+
+      // Filter employees if search query exists
+      const filtered = employees.filter(emp => {
+        if (!filterQuery) return true;
+        const name = (emp.name || '').toLowerCase();
+        const dept = (emp.department || '').toLowerCase();
+        const desig = (emp.designation || '').toLowerCase();
+        return name.includes(filterQuery) || dept.includes(filterQuery) || desig.includes(filterQuery);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+              <i data-lucide="search-x" style="width: 28px; height: 28px; margin-bottom: 0.5rem; display: block; margin: 0 auto 0.5rem;"></i>
+              No staff members match "<strong>${escapeHtml(filterQuery)}</strong>"
+            </td>
+          </tr>
+        `;
+        if (container) container.style.display = 'block';
+        if (emptyContainer) emptyContainer.style.display = 'none';
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      if (container) container.style.display = 'block';
+      if (emptyContainer) emptyContainer.style.display = 'none';
+
+      tbody.innerHTML = filtered.map(emp => {
+        const initials = emp.name.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
+        const att = todayAttendance.find(a => a.userId === emp.id);
+        const leave = leaveUserMap[emp.id];
+
+        let statusBadge;
+        let checkInText = '-';
+        let checkOutText = '-';
+        let hoursText = '-';
+
+        if (att) {
+          checkInText = formatTime(att.checkIn);
+          checkOutText = att.checkOut ? formatTime(att.checkOut) : '<span class="text-teal" style="font-size:0.78rem; font-weight:600;">In Progress</span>';
+          hoursText = att.hours ? `${att.hours} hrs` : '-';
+
+          if (att.status === 'half_day') {
+            statusBadge = '<span class="badge badge-purple"><span class="badge-dot"></span>Half Day</span>';
+          } else if (att.status === 'late' || att.late) {
+            statusBadge = '<span class="badge badge-amber"><span class="badge-dot"></span>Late</span>';
+          } else {
+            statusBadge = '<span class="badge badge-teal"><span class="badge-dot"></span>Present</span>';
+          }
+        } else if (leave) {
+          statusBadge = `<span class="badge badge-purple"><span class="badge-dot"></span>On ${leave.type} Leave</span>`;
+        } else {
+          statusBadge = '<span class="badge badge-red"><span class="badge-dot"></span>Absent</span>';
+        }
+
+        return `
+          <tr>
+            <td data-label="Employee">
+              <div class="user-cell">
+                <div class="avatar avatar-teal" style="background: linear-gradient(135deg, #0F9D8A 0%, #12B5A0 100%);">${initials}</div>
+                <div>
+                  <div class="user-cell-name" style="font-weight: 700;">${escapeHtml(emp.name)}</div>
+                  <div class="user-cell-sub">${escapeHtml(emp.department || 'Staff')} &bull; ${escapeHtml(emp.designation || '')}</div>
+                </div>
+              </div>
+            </td>
+            <td data-label="Check In"><span style="font-weight: 600;">${checkInText}</span></td>
+            <td data-label="Check Out"><span style="font-weight: 600;">${checkOutText}</span></td>
+            <td data-label="Logged Hours"><span style="font-weight: 600;">${hoursText}</span></td>
+            <td data-label="Status">${statusBadge}</td>
+          </tr>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function filterRosterTable(query) {
+      renderTodayRoster(cachedEmployees, cachedAttendance, cachedLeaves, query);
+    }
+
+    // 8. Pending Leave Requests with inline actions
+    function renderQuickPendingLeaves(pendingLeaves) {
+      const container = document.getElementById('quick-pending-leaves-list');
+      if (!container) return;
+
+      if (pendingLeaves.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem; background: var(--surface-2); border-radius: var(--radius-md); border: 1px dashed var(--border);">
+            <i data-lucide="check-circle-2" style="width: 26px; height: 26px; color: var(--primary); margin: 0 auto 0.4rem; display: block;"></i>
+            <div style="font-weight: 700; color: var(--text);">All caught up 🎉</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">No pending leave applications awaiting decision.</div>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = pendingLeaves.slice(0, 4).map(l => {
+        const u = getUserById(l.userId);
+        const name = u ? u.name : 'Unknown';
+        const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
+        return `
+          <div style="background: var(--surface-2); padding: 0.85rem; border-radius: var(--radius-md); border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 0.6rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; min-width: 0;">
+              <div class="avatar avatar-sm avatar-purple" style="font-size: 0.7rem; flex-shrink: 0;">${initials}</div>
+              <div style="min-width: 0;">
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--text);" class="truncate">${escapeHtml(name)}</div>
+                <div style="font-size: 0.74rem; color: var(--text-muted);" class="truncate">
+                  <span class="badge badge-purple" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">${escapeHtml(l.type.toUpperCase())}</span> &bull; ${l.days}d (${formatDate(l.from)} - ${formatDate(l.to)})
+                </div>
+              </div>
+            </div>
+            <div class="d-flex gap-1 flex-shrink-0">
+              <button class="btn btn-sm btn-secondary" onclick="openReviewLeaveModal('${l.id}')" title="Review" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">
+                Review
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openReviewLeaveModal(leaveId) {
+      reviewingLeaveId = leaveId;
+      const leaves = getLeaves();
+      const leave = leaves.find(l => l.id === leaveId);
+      if (!leave) return;
+
+      const user = getUserById(leave.userId);
+      const container = document.getElementById('leave-review-details');
+
+      container.innerHTML = `
+        <div style="background: var(--surface-2); padding: 1.1rem; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 1rem;">
+          <div style="font-weight: 800; font-size: 1.05rem; color: var(--text); margin-bottom: 0.25rem;">${escapeHtml(user ? user.name : 'Employee')}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.85rem;">
+            ${escapeHtml(user ? user.department : '')} &bull; ${escapeHtml(user ? user.designation : '')}
+          </div>
+          <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+            <span class="text-muted">Leave Type:</span>
+            <span class="badge badge-purple">${escapeHtml(leave.type.toUpperCase())}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+            <span class="text-muted">Duration:</span>
+            <span><strong>${formatDate(leave.from)}</strong> to <strong>${formatDate(leave.to)}</strong> (${leave.days} working day${leave.days > 1 ? 's' : ''})</span>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size: 0.85rem;">
+            <span class="text-muted">Reason:</span>
+            <span style="font-style: italic; max-width: 65%; text-align: right; color: var(--text);">"${escapeHtml(leave.reason)}"</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="leave-decision-comment">Administrative Decision Feedback</label>
+          <textarea id="leave-decision-comment" class="form-control" rows="3" placeholder="Optional notes for employee..."></textarea>
+        </div>
+      `;
+
+      openModal('leave-review-modal');
+    }
+
+    function submitLeaveDecision(decision) {
+      if (!reviewingLeaveId) return;
+
+      const commentInput = document.getElementById('leave-decision-comment');
+      const comment = commentInput ? commentInput.value.trim() : '';
+
+      const leaves = getLeaves();
+      const idx = leaves.findIndex(l => l.id === reviewingLeaveId);
+      if (idx !== -1) {
+        leaves[idx].status = decision;
+        leaves[idx].comment = comment || (decision === 'approved' ? 'Approved by Admin' : 'Rejected by Admin');
+        saveLeaves(leaves);
+        showToast(`Leave application ${decision} successfully!`, decision === 'approved' ? 'success' : 'info');
+      }
+
+      closeModal('leave-review-modal');
+      reviewingLeaveId = null;
+      loadAdminDashboard();
+    }
+
+    // 9. Broadcast Announcements Feed
+    function renderAnnouncementsFeed() {
+      const container = document.getElementById('admin-announcements-feed');
+      if (!container) return;
+
+      const announcements = getAnnouncements();
+      if (announcements.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 1.5rem 1rem; color: var(--text-muted); font-size: 0.82rem; background: var(--surface-2); border-radius: var(--radius-md); border: 1px dashed var(--border);">
+            <i data-lucide="bell" style="width: 22px; height: 22px; margin: 0 auto 0.35rem; display: block; color: var(--text-muted);"></i>
+            No announcements published yet.
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      container.innerHTML = announcements.slice(-3).reverse().map(a => {
+        return `
+          <div style="background: var(--surface-2); padding: 0.85rem; border-radius: var(--radius-md); border-left: 3px solid var(--accent); border: 1px solid var(--border); border-left-width: 3px; position: relative;">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <strong style="font-size: 0.85rem; color: var(--text);">${escapeHtml(a.title)}</strong>
+              <button class="btn btn-icon btn-sm text-danger" onclick="deleteAnnouncement('${a.id}')" title="Delete" style="padding: 2px;">
+                <i data-lucide="trash-2" style="width: 13px; height: 13px;"></i>
+              </button>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.35rem; line-height: 1.4;">${escapeHtml(a.message)}</p>
+            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">${formatDate(a.date, true)}</span>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function handlePostAnnouncement(e) {
+      e.preventDefault();
+      const titleInput = document.getElementById('ann-title');
+      const msgInput = document.getElementById('ann-message');
+
+      if (!titleInput.value.trim() || !msgInput.value.trim()) {
+        showToast('Please fill all fields', 'error');
+        return;
+      }
+
+      const admin = getCurrentUser();
+      const newAnn = {
+        id: generateId('ann'),
+        title: titleInput.value.trim(),
+        message: msgInput.value.trim(),
+        date: todayStr(),
+        authorId: admin ? admin.id : 'admin'
+      };
+
+      const list = getAnnouncements();
+      list.push(newAnn);
+      saveAnnouncements(list);
+
+      closeModal('announcement-modal');
+      titleInput.value = '';
+      msgInput.value = '';
+      showToast('Announcement broadcasted to team!', 'success');
+      renderAnnouncementsFeed();
+    }
+
+    function deleteAnnouncement(id) {
+      const list = getAnnouncements().filter(a => a.id !== id);
+      saveAnnouncements(list);
+      showToast('Announcement removed', 'info');
+      renderAnnouncementsFeed();
+    }
+
+    // 10. Department Headcount Progress Bars
+    function renderDeptHeadcount(employees) {
+      const container = document.getElementById('dept-headcount-container');
+      const badge = document.getElementById('dept-count-badge');
+      if (!container) return;
+
+      const deptCounts = {};
+      employees.forEach(e => {
+        const d = e.department || 'General';
+        deptCounts[d] = (deptCounts[d] || 0) + 1;
+      });
+
+      const depts = Object.keys(deptCounts);
+      if (badge) badge.textContent = `${depts.length} Department${depts.length === 1 ? '' : 's'}`;
+
+      if (depts.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 1.5rem 1rem; color: var(--text-muted); font-size: 0.82rem; background: var(--surface-2); border-radius: var(--radius-md); border: 1px dashed var(--border);">
+            <i data-lucide="building" style="width: 22px; height: 22px; margin: 0 auto 0.35rem; display: block;"></i>
+            No departments defined yet.
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const colors = ['#0F9D8A', '#5B4FCF', '#F0962B', '#2563EB', '#E5484D', '#16A34A'];
+      const totalEmp = employees.length || 1;
+
+      container.innerHTML = depts.map((d, idx) => {
+        const count = deptCounts[d];
+        const pct = Math.round((count / totalEmp) * 100);
+        const color = colors[idx % colors.length];
+
+        return `
+          <div class="dept-headcount-item">
+            <div class="dept-headcount-header">
+              <span>${escapeHtml(d)}</span>
+              <span class="dept-headcount-sub"><strong>${count}</strong> staff (${pct}%)</span>
+            </div>
+            <div class="dept-bar-track">
+              <div class="dept-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>

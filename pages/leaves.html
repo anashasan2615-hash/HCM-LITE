@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leave Management - HCM Lite</title>
+  <meta name="description" content="Review, approve, and reject staff leave applications with audit comments and quota enforcement.">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Mobile Sidebar Overlay Backdrop -->
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- Fixed Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-text-logo">
+          <span class="brand-hcm">HCM</span><span class="brand-lite">Lite</span>
+        </div>
+        <span class="sidebar-company-name">Organization</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main Menu</div>
+        <a href="admin.html" class="nav-item">
+          <span>Dashboard</span>
+        </a>
+        <a href="employees.html" class="nav-item">
+          <span>Employees</span>
+        </a>
+        <a href="leaves.html" class="nav-item is-active">
+          <span>Leave Requests</span>
+        </a>
+        <a href="payslip.html" class="nav-item">
+          <span>Payroll & Slips</span>
+        </a>
+
+        <div class="nav-section-label mt-3">Administration</div>
+        <a href="settings.html" class="nav-item">
+          <span>Company Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-signout-btn" onclick="logout('../index.html')">
+          <i data-lucide="log-out"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Application Header -->
+      <header class="top-header">
+        <div class="topbar-left">
+          <button class="btn btn-secondary btn-icon mobile-nav-toggle hide-desktop" aria-label="Toggle Navigation Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <h1 class="header-title" style="font-size: 1.25rem; font-weight: 700; margin: 0;">Leave Approvals</h1>
+            <span class="hide-mobile" style="font-size: 0.8rem; color: var(--text-muted);">Manage vacation requests, medical leaves, and absence approvals</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="date-chip hide-mobile">
+            <i data-lucide="calendar"></i>
+            <span id="top-header-date">Today</span>
+          </div>
+
+          <button class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">
+            <i data-lucide="moon"></i>
+          </button>
+
+          <!-- User Menu -->
+          <div class="dropdown-wrapper">
+            <button class="profile-pill" onclick="openChangePasswordModal()" aria-label="User profile and settings">
+              <div class="avatar avatar-teal nav-user-avatar">AD</div>
+              <div class="profile-pill-info hide-mobile">
+                <div class="nav-user-name">Admin</div>
+                <div class="nav-user-role">Administrator</div>
+              </div>
+              <i data-lucide="key-round" title="Change Password"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content Body -->
+      <main class="page-body" style="max-width: 1440px; margin: 0 auto; width: 100%;">
+        
+        <!-- Consistent Page Header -->
+        <div class="page-header-block">
+          <div class="page-breadcrumb">
+            <a href="admin.html">Dashboard</a>
+            <span class="page-breadcrumb-separator">/</span>
+            <span>Leave Management</span>
+          </div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title-text">Leave Management</h1>
+              <p class="page-subtitle-text">Review and adjudicate employee vacation, sick, and casual leave applications</p>
+            </div>
+          </div>
+          <div class="page-header-divider"></div>
+        </div>
+
+        <!-- Filter Tabs (Segmented Control + Search) -->
+        <div class="card mb-4 p-3">
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="segmented-tabs" id="leave-filter-tabs">
+              <button type="button" class="segmented-tab active" data-tab="all" onclick="switchLeaveTab('all')">
+                All Applications (<span id="count-tab-all">0</span>)
+              </button>
+              <button type="button" class="segmented-tab" data-tab="pending" onclick="switchLeaveTab('pending')">
+                Pending (<span id="count-tab-pending" style="color: var(--warning); font-weight: 700;">0</span>)
+              </button>
+              <button type="button" class="segmented-tab" data-tab="approved" onclick="switchLeaveTab('approved')">
+                Approved (<span id="count-tab-approved" style="color: var(--primary); font-weight: 700;">0</span>)
+              </button>
+              <button type="button" class="segmented-tab" data-tab="rejected" onclick="switchLeaveTab('rejected')">
+                Rejected (<span id="count-tab-rejected" style="color: var(--danger); font-weight: 700;">0</span>)
+              </button>
+            </div>
+
+            <div class="input-with-icon" style="max-width: 270px;">
+              <i data-lucide="search" class="field-icon"></i>
+              <input type="text" id="leave-search-input" class="form-control" placeholder="Search employee or reason..." oninput="renderLeavesTable()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaves Table Card -->
+        <div class="card" id="leaves-table-container">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Category</th>
+                  <th>Date Range</th>
+                  <th>Working Days</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Admin Remarks</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="leaves-table-body">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="leaves-empty-state" style="display: none;"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Review / Decision on Leave -->
+  <div class="modal-backdrop" id="leave-decision-modal">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Review Leave Application</h3>
+        <button class="modal-close-btn" onclick="closeModal('leave-decision-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="leave-decision-modal-content">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('leave-decision-modal')">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="submitModalDecision('rejected')">
+          <i data-lucide="x" style="width: 15px; height: 15px;"></i>
+          <span>Reject Request</span>
+        </button>
+        <button type="button" class="btn btn-primary" onclick="submitModalDecision('approved')">
+          <i data-lucide="check" style="width: 15px; height: 15px;"></i>
+          <span>Approve Request</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Change Password (Self) -->
+  <div class="modal-backdrop" id="change-password-modal">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Change Account Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('change-password-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form onsubmit="handlePasswordChangeSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="cp-current-pass">Current Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-current-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-new-pass">New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-new-pass" class="form-control" placeholder="Min 6 characters" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-confirm-pass">Confirm New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock-check" class="field-icon"></i>
+              <input type="password" id="cp-confirm-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('change-password-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="../js/storage.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/leave.js"></script>
+
+  <script>
+    let activeTab = 'all';
+    let currentModalLeaveId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const admin = requireRole('admin');
+      if (!admin) return;
+
+      setupNavigationUser(admin);
+      renderLeavesTable();
+      if (window.lucide) lucide.createIcons();
+    });
+
+    function switchLeaveTab(tab) {
+      activeTab = tab;
+      document.querySelectorAll('#leave-filter-tabs .segmented-tab').forEach(btn => {
+        if (btn.dataset.tab === tab) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      renderLeavesTable();
+    }
+
+    function renderLeavesTable() {
+      const allLeaves = getLeaves();
+      const users = getUsers();
+      const userMap = {};
+      users.forEach(u => { userMap[u.id] = u; });
+
+      // Tab Counts
+      const countAll = allLeaves.length;
+      const countPending = allLeaves.filter(l => l.status === 'pending').length;
+      const countApproved = allLeaves.filter(l => l.status === 'approved').length;
+      const countRejected = allLeaves.filter(l => l.status === 'rejected').length;
+
+      document.getElementById('count-tab-all').textContent = countAll;
+      document.getElementById('count-tab-pending').textContent = countPending;
+      document.getElementById('count-tab-approved').textContent = countApproved;
+      document.getElementById('count-tab-rejected').textContent = countRejected;
+
+      // Filter by Tab
+      let filtered = allLeaves;
+      if (activeTab !== 'all') {
+        filtered = filtered.filter(l => l.status === activeTab);
+      }
+
+      // Filter by Search Query
+      const searchInput = document.getElementById('leave-search-input');
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      if (query) {
+        filtered = filtered.filter(l => {
+          const u = userMap[l.userId];
+          const name = u ? u.name.toLowerCase() : '';
+          return name.includes(query) || l.reason.toLowerCase().includes(query);
+        });
+      }
+
+      const tableWrapper = document.getElementById('leaves-table-container');
+      const emptyContainer = document.getElementById('leaves-empty-state');
+      const tbody = document.getElementById('leaves-table-body');
+
+      if (filtered.length === 0) {
+        if (tableWrapper) tableWrapper.style.display = 'none';
+        if (emptyContainer) {
+          emptyContainer.style.display = 'block';
+          renderEmptyState(emptyContainer, {
+            title: `No ${activeTab !== 'all' ? activeTab : ''} Leave Requests`,
+            message: 'There are no leave applications matching your current filter criteria.'
+          });
+        }
+        return;
+      }
+
+      if (tableWrapper) tableWrapper.style.display = 'block';
+      if (emptyContainer) emptyContainer.style.display = 'none';
+
+      // Sort newest applications first
+      filtered.sort((a,b) => b.from.localeCompare(a.from));
+
+      tbody.innerHTML = filtered.map(l => {
+        const u = userMap[l.userId] || { name: 'Unknown User', department: 'General', designation: '' };
+        const initials = u.name.split(' ').map(n=>n[0]).join('').toUpperCase().substring(0,2);
+
+        const statusColor = l.status === 'approved' ? 'var(--primary)' : (l.status === 'rejected' ? 'var(--danger)' : 'var(--warning)');
+        const badgeColor = l.status === 'approved' ? 'teal' : (l.status === 'rejected' ? 'red' : 'amber');
+
+        const actionBtn = l.status === 'pending'
+          ? `<button class="btn btn-primary btn-sm" onclick="openDecisionModal('${l.id}')">
+               <i data-lucide="check-square" style="width: 14px; height: 14px;"></i>
+               <span>Review</span>
+             </button>`
+          : `<button class="btn btn-secondary btn-sm" onclick="openDecisionModal('${l.id}')">
+               <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+               <span>Update</span>
+             </button>`;
+
+        return `
+          <tr style="border-left: 4px solid ${statusColor};">
+            <td data-label="Employee">
+              <div class="user-cell">
+                <div class="avatar avatar-teal" style="background: linear-gradient(135deg, #0F9D8A 0%, #12B5A0 100%); flex-shrink: 0;">${initials}</div>
+                <div>
+                  <div class="user-cell-name" style="font-weight: 700;">${escapeHtml(u.name)}</div>
+                  <div class="user-cell-sub">${escapeHtml(u.department)} &bull; ${escapeHtml(u.designation)}</div>
+                </div>
+              </div>
+            </td>
+            <td data-label="Category">
+              <span class="badge badge-purple" style="font-weight: 600;">${escapeHtml(l.type.toUpperCase())}</span>
+            </td>
+            <td data-label="Date Range">
+              <div><strong>${formatDate(l.from)}</strong> &rarr; <strong>${formatDate(l.to)}</strong></div>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Applied: ${formatDate(l.appliedOn || l.from)}</div>
+            </td>
+            <td data-label="Working Days">
+              <span style="font-weight: 800; color: var(--text);">${l.days} day${l.days>1?'s':''}</span>
+            </td>
+            <td data-label="Reason">
+              <div style="cursor: pointer; max-width: 260px;" onclick="alert('Full Reason:\\n' + ${JSON.stringify(l.reason)})" title="Click to view full reason">
+                <span style="font-style: italic; color: var(--text-muted); font-size: 0.825rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">"${escapeHtml(l.reason)}"</span>
+              </div>
+            </td>
+            <td data-label="Status">
+              <span class="badge badge-${badgeColor}"><span class="badge-dot"></span>${l.status.toUpperCase()}</span>
+            </td>
+            <td data-label="Admin Remarks">
+              <span style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(l.comment || '-')}</span>
+            </td>
+            <td data-label="Action" style="text-align: right;">
+              ${actionBtn}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function openDecisionModal(leaveId) {
+      currentModalLeaveId = leaveId;
+      const leave = getLeaves().find(l => l.id === leaveId);
+      if (!leave) return;
+
+      const user = getUserById(leave.userId);
+      const container = document.getElementById('leave-decision-modal-content');
+
+      container.innerHTML = `
+        <div style="background: var(--bg-surface); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+          <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">${escapeHtml(user ? user.name : 'Employee')}</h4>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem;">${escapeHtml(user ? user.department : '')} &bull; Current Status: <strong>${leave.status.toUpperCase()}</strong></p>
+
+          <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+            <span class="text-muted">Leave Type:</span>
+            <span class="badge badge-purple">${escapeHtml(leave.type.toUpperCase())}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2" style="font-size: 0.85rem;">
+            <span class="text-muted">Working Days:</span>
+            <span><strong>${leave.days} working day${leave.days > 1 ? 's' : ''}</strong> (${formatDate(leave.from)} to ${formatDate(leave.to)})</span>
+          </div>
+          <div class="d-flex justify-content-between" style="font-size: 0.85rem;">
+            <span class="text-muted">Reason:</span>
+            <span style="font-style: italic; max-width: 60%; text-align: right;">"${escapeHtml(leave.reason)}"</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="admin-decision-comment">Administrative Decision Comment</label>
+          <textarea id="admin-decision-comment" class="form-control" rows="3" placeholder="Provide notes or feedback for the employee...">${escapeHtml(leave.comment || '')}</textarea>
+        </div>
+      `;
+
+      openModal('leave-decision-modal');
+    }
+
+    function submitModalDecision(decision) {
+      if (!currentModalLeaveId) return;
+
+      const commentInput = document.getElementById('admin-decision-comment');
+      const comment = commentInput ? commentInput.value.trim() : '';
+
+      const allLeaves = getLeaves();
+      const idx = allLeaves.findIndex(l => l.id === currentModalLeaveId);
+      if (idx !== -1) {
+        allLeaves[idx].status = decision;
+        allLeaves[idx].comment = comment || (decision === 'approved' ? 'Approved by Admin' : 'Rejected by Admin');
+        saveLeaves(allLeaves);
+        showToast(`Leave application marked as ${decision.toUpperCase()}!`, decision === 'approved' ? 'success' : 'info');
+      }
+
+      closeModal('leave-decision-modal');
+      currentModalLeaveId = null;
+      renderLeavesTable();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Settings - HCM Lite</title>
+  <meta name="description" content="Configure company working days, office hours, grace period, and leave quotas.">
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <!-- Mobile Sidebar Overlay Backdrop -->
+  <div class="sidebar-overlay"></div>
+
+  <div class="app-layout">
+    <!-- Fixed Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-text-logo">
+          <span class="brand-hcm">HCM</span><span class="brand-lite">Lite</span>
+        </div>
+        <span class="sidebar-company-name">Organization</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main Menu</div>
+        <a href="admin.html" class="nav-item">
+          <span>Dashboard</span>
+        </a>
+        <a href="employees.html" class="nav-item">
+          <span>Employees</span>
+        </a>
+        <a href="leaves.html" class="nav-item">
+          <span>Leave Requests</span>
+        </a>
+        <a href="payslip.html" class="nav-item">
+          <span>Payroll & Slips</span>
+        </a>
+
+        <div class="nav-section-label mt-3">Administration</div>
+        <a href="settings.html" class="nav-item is-active">
+          <span>Company Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-signout-btn" onclick="logout('../index.html')">
+          <i data-lucide="log-out"></i>
+          <span>Sign Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+      <!-- Top Application Header -->
+      <header class="top-header">
+        <div class="topbar-left">
+          <button class="btn btn-secondary btn-icon mobile-nav-toggle hide-desktop" aria-label="Toggle Navigation Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <h1 class="header-title" style="font-size: 1.25rem; font-weight: 700; margin: 0;">Company & Policy Settings</h1>
+            <span class="hide-mobile" style="font-size: 0.8rem; color: var(--text-muted);">Adjust shift timings, grace periods, leave policies, and working week</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="date-chip hide-mobile">
+            <i data-lucide="calendar"></i>
+            <span id="top-header-date">Today</span>
+          </div>
+
+          <button class="theme-toggle-btn" aria-label="Toggle Dark/Light Mode" onclick="toggleTheme()">
+            <i data-lucide="moon"></i>
+          </button>
+
+          <!-- User Menu -->
+          <div class="dropdown-wrapper">
+            <button class="profile-pill" onclick="openChangePasswordModal()" aria-label="User profile and settings">
+              <div class="avatar avatar-teal nav-user-avatar">AD</div>
+              <div class="profile-pill-info hide-mobile">
+                <div class="nav-user-name">Admin</div>
+                <div class="nav-user-role">Administrator</div>
+              </div>
+              <i data-lucide="key-round" title="Change Password"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content Body -->
+      <main class="page-body" style="max-width: 1440px; margin: 0 auto; width: 100%;">
+        
+        <!-- Consistent Page Header -->
+        <div class="page-header-block">
+          <div class="page-breadcrumb">
+            <a href="admin.html">Dashboard</a>
+            <span class="page-breadcrumb-separator">/</span>
+            <span>Organization Settings</span>
+          </div>
+          <div class="page-title-row">
+            <div>
+              <h1 class="page-title-text">Company Settings</h1>
+              <p class="page-subtitle-text">Configure working hours, shift grace periods, annual leave policies, and working days</p>
+            </div>
+          </div>
+          <div class="page-header-divider"></div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Main Settings Form Column -->
+          <div class="col-lg-8">
+            <div class="card p-4">
+              <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="sliders" style="color: var(--primary); width: 20px; height: 20px;"></i>
+                <span>Organization & Attendance Policies</span>
+              </h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                Changes saved here will immediately govern business calculations for late check-ins, half-days, leave allowances, and payslip deductions across all users.
+              </p>
+
+              <form id="settings-form" novalidate onsubmit="handleSettingsSave(event)">
+                
+                <!-- Section 1: Company Profile -->
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 0.85rem; display: flex; align-items: center; gap: 0.35rem;">
+                  <i data-lucide="building" style="width: 14px; height: 14px;"></i>
+                  <span>1. Company Profile</span>
+                </div>
+
+                <div class="form-group mb-4">
+                  <label class="form-label" for="setting-company-name">Company Legal Name *</label>
+                  <div class="input-with-icon">
+                    <i data-lucide="building" class="field-icon"></i>
+                    <input type="text" id="setting-company-name" class="form-control" required>
+                  </div>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; display: block;">
+                    Displayed on login screens, payslip vouchers, and system headers.
+                  </span>
+                </div>
+
+                <!-- Section 2: Attendance & Shift Rules -->
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 0.85rem; margin-top: 1.5rem; display: flex; align-items: center; gap: 0.35rem;">
+                  <i data-lucide="clock" style="width: 14px; height: 14px;"></i>
+                  <span>2. Shift & Late Rules</span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <div class="form-group mb-0">
+                      <label class="form-label" for="setting-office-start">Office Shift Start Time *</label>
+                      <div class="input-with-icon">
+                        <i data-lucide="clock" class="field-icon"></i>
+                        <input type="time" id="setting-office-start" class="form-control" required>
+                      </div>
+                      <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; display: block;">
+                        Standard daily check-in start (e.g. 09:00 AM)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group mb-0">
+                      <label class="form-label" for="setting-grace-minutes">Grace Period Allowance (Minutes) *</label>
+                      <div class="input-with-icon">
+                        <i data-lucide="timer" class="field-icon"></i>
+                        <input type="number" id="setting-grace-minutes" class="form-control" min="0" max="120" required>
+                      </div>
+                      <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; display: block;">
+                        Punches after Shift Start + Grace are recorded as <strong>Late</strong>.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section 3: Leave Policy & Working Days -->
+                <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--primary); margin-bottom: 0.85rem; margin-top: 1.5rem; display: flex; align-items: center; gap: 0.35rem;">
+                  <i data-lucide="calendar" style="width: 14px; height: 14px;"></i>
+                  <span>3. Leave Policy & Working Schedule</span>
+                </div>
+
+                <div class="form-group mb-4">
+                  <label class="form-label" for="setting-leave-quota">Annual Paid Leave Quota (Per Employee) *</label>
+                  <div class="input-with-icon">
+                    <i data-lucide="palmtree" class="field-icon"></i>
+                    <input type="number" id="setting-leave-quota" class="form-control" min="0" max="90" required>
+                  </div>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.35rem; display: block;">
+                    Maximum allowable paid leaves per employee per year before applications are blocked.
+                  </span>
+                </div>
+
+                <div class="form-group mb-4">
+                  <label class="form-label mb-2">Company Working Days *</label>
+                  <div class="weekday-toggle-grid">
+                    <div>
+                      <input type="checkbox" name="workingDay" value="1" id="wd-mon" class="weekday-toggle-input" hidden>
+                      <label for="wd-mon" class="weekday-pill-label">Mon</label>
+                    </div>
+                    <div>
+                      <input type="checkbox" name="workingDay" value="2" id="wd-tue" class="weekday-toggle-input" hidden>
+                      <label for="wd-tue" class="weekday-pill-label">Tue</label>
+                    </div>
+                    <div>
+                      <input type="checkbox" name="workingDay" value="3" id="wd-wed" class="weekday-toggle-input" hidden>
+                      <label for="wd-wed" class="weekday-pill-label">Wed</label>
+                    </div>
+                    <div>
+                      <input type="checkbox" name="workingDay" value="4" id="wd-thu" class="weekday-toggle-input" hidden>
+                      <label for="wd-thu" class="weekday-pill-label">Thu</label>
+                    </div>
+                    <div>
+                      <input type="checkbox" name="workingDay" value="5" id="wd-fri" class="weekday-toggle-input" hidden>
+                      <label for="wd-fri" class="weekday-pill-label">Fri</label>
+                    </div>
+                    <div>
+                      <input type="checkbox" name="workingDay" value="6" id="wd-sat" class="weekday-toggle-input" hidden>
+                      <label for="wd-sat" class="weekday-pill-label">Sat</label>
+                    </div>
+                    <div>
+                      <input type="checkbox" name="workingDay" value="0" id="wd-sun" class="weekday-toggle-input" hidden>
+                      <label for="wd-sun" class="weekday-pill-label">Sun</label>
+                    </div>
+                  </div>
+                  <span style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; display: block;">
+                    Click day pills to toggle. Off-days automatically exempt employees from absence calculations and leave deductions.
+                  </span>
+                </div>
+
+                <!-- Section 4: Bonus AI Integration -->
+                <div class="card p-3 mb-2" style="background: var(--surface-2); border: 1px dashed var(--border);">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge badge-purple" style="font-size: 0.725rem;">Smart Assistant</span>
+                    <strong style="font-size: 0.88rem; color: var(--accent);">Optional Demo LLM API Key</strong>
+                  </div>
+                  <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    HCM Lite's Smart Helper works 100% offline using client-side workforce intent parsing. If you wish to enable conversational AI replies, supply your private demo key here (stored strictly in your browser's localStorage).
+                  </p>
+                  <div class="input-with-icon">
+                    <i data-lucide="key" class="field-icon"></i>
+                    <input type="password" id="setting-llm-key" class="form-control" placeholder="Optional: sk-or-gemini-demo-key...">
+                    <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+          </div>
+
+          <!-- Policy Summary & Explanations Column -->
+          <div class="col-lg-4">
+            <div class="card p-4 mb-4">
+              <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.45rem;">
+                <i data-lucide="check-circle-2" style="color: var(--primary); width: 18px; height: 18px;"></i>
+                <span>Active Policy Overview</span>
+              </h3>
+              
+              <div class="d-flex flex-column gap-3" style="font-size: 0.85rem;">
+                <div class="p-3" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Shift & Late Rule</div>
+                  <div class="mt-1" id="summary-shift-rule" style="font-weight: 600; color: var(--text);">-</div>
+                </div>
+
+                <div class="p-3" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Half-Day Threshold</div>
+                  <div class="mt-1" style="font-weight: 600; color: var(--accent);">Less than 5 hours worked on check-out</div>
+                </div>
+
+                <div class="p-3" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Annual Leave Quota</div>
+                  <div class="mt-1" id="summary-leave-quota" style="font-weight: 600; color: var(--primary);">-</div>
+                </div>
+
+                <div class="p-3" style="background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-md);">
+                  <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700;">Working Days Active</div>
+                  <div class="mt-1" id="summary-working-days" style="font-weight: 600; color: var(--text);">-</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Business Rules Quick Guide -->
+            <div class="card p-4" style="background: var(--surface-2); border: 1px solid var(--border);">
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--primary); margin-bottom: 0.75rem;">
+                HR Business Rules Engine
+              </h4>
+              <ul style="font-size: 0.8rem; line-height: 1.6; color: var(--text-muted); padding-left: 1.1rem; margin: 0;">
+                <li><strong style="color: var(--text);">One check-in per day:</strong> employees cannot check in multiple times per calendar date.</li>
+                <li><strong style="color: var(--text);">Check-out rule:</strong> Check-out only allowed after check-in.</li>
+                <li><strong style="color: var(--text);">Absence computation:</strong> Absent is never stored in DB. A past working day without attendance or approved leave automatically computes as Absent.</li>
+                <li><strong style="color: var(--text);">Salary deduction:</strong> Per-day rate is based on working days in month. 1 absent = 1 day deducted; 1 half-day = 0.5 day deducted.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Save Changes Bar with Unsaved Indicator -->
+        <div class="sticky-save-bar" id="settings-sticky-bar">
+          <div class="unsaved-indicator">
+            <span class="unsaved-dot" id="save-status-dot"></span>
+            <span id="save-status-text">All policy changes saved</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="loadCompanySettings()">Discard Changes</button>
+            <button type="submit" form="settings-form" class="btn btn-primary btn-sm" id="btn-save-settings">
+              <i data-lucide="save" style="width: 15px; height: 15px;"></i>
+              <span>Save Policy Settings</span>
+            </button>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Modal: Change Password (Self) -->
+  <div class="modal-backdrop" id="change-password-modal">
+    <div class="modal-card" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Change Account Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('change-password-modal')">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form onsubmit="handlePasswordChangeSubmit(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="cp-current-pass">Current Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-current-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-new-pass">New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock" class="field-icon"></i>
+              <input type="password" id="cp-new-pass" class="form-control" placeholder="Min 6 characters" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cp-confirm-pass">Confirm New Password *</label>
+            <div class="input-with-icon">
+              <i data-lucide="lock-check" class="field-icon"></i>
+              <input type="password" id="cp-confirm-pass" class="form-control" required>
+              <button type="button" class="password-toggle"><i data-lucide="eye"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('change-password-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Application Scripts -->
+  <script src="../js/storage.js"></script>
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/ui.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const admin = requireRole('admin');
+      if (!admin) return;
+
+      setupNavigationUser(admin);
+      loadCompanySettings();
+      if (window.lucide) lucide.createIcons();
+    });
+
+    function loadCompanySettings() {
+      const company = getCompany() || {
+        name: 'My Company',
+        officeStart: '09:00',
+        graceMinutes: 15,
+        yearlyLeaveQuota: 20,
+        workingDays: [1, 2, 3, 4, 5]
+      };
+
+      document.getElementById('setting-company-name').value = company.name || '';
+      document.getElementById('setting-office-start').value = company.officeStart || '09:00';
+      document.getElementById('setting-grace-minutes').value = company.graceMinutes !== undefined ? company.graceMinutes : 15;
+      document.getElementById('setting-leave-quota').value = company.yearlyLeaveQuota || 20;
+
+      // Working days checkboxes
+      const workingDays = company.workingDays || [1, 2, 3, 4, 5];
+      document.querySelectorAll('input[name="workingDay"]').forEach(cb => {
+        cb.checked = workingDays.includes(Number(cb.value));
+      });
+
+      // LLM Key bonus
+      const savedKey = localStorage.getItem(STORAGE_KEYS.LLM_KEY);
+      if (savedKey) {
+        document.getElementById('setting-llm-key').value = savedKey;
+      }
+
+      updateSummary(company);
+    }
+
+    function updateSummary(company) {
+      const start = company.officeStart || '09:00';
+      const grace = company.graceMinutes || 15;
+      const startMins = timeToMinutes(start);
+      const lateMins = startMins + grace;
+      const lateTime = minutesToTime(lateMins);
+
+      document.getElementById('summary-shift-rule').textContent = 
+        `Starts at ${formatTime(start)} (+${grace}m grace). Late after ${formatTime(lateTime)}`;
+
+      document.getElementById('summary-leave-quota').textContent = 
+        `${company.yearlyLeaveQuota || 20} paid days per employee / year`;
+
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const activeDays = (company.workingDays || [1,2,3,4,5])
+        .sort((a,b) => (a === 0 ? 7 : a) - (b === 0 ? 7 : b))
+        .map(d => dayNames[d])
+        .join(', ');
+
+      document.getElementById('summary-working-days').textContent = activeDays || 'None selected';
+    }
+
+    function handleSettingsSave(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('setting-company-name');
+      const startInput = document.getElementById('setting-office-start');
+      const graceInput = document.getElementById('setting-grace-minutes');
+      const quotaInput = document.getElementById('setting-leave-quota');
+
+      clearAllFieldErrors(document.getElementById('settings-form'));
+
+      let hasError = false;
+      if (!nameInput.value.trim()) {
+        showFieldError(nameInput, 'Company name is required');
+        hasError = true;
+      }
+      if (!startInput.value) {
+        showFieldError(startInput, 'Office start time is required');
+        hasError = true;
+      }
+      if (graceInput.value === '' || Number(graceInput.value) < 0) {
+        showFieldError(graceInput, 'Grace minutes must be 0 or greater');
+        hasError = true;
+      }
+      if (!quotaInput.value || Number(quotaInput.value) <= 0) {
+        showFieldError(quotaInput, 'Yearly leave quota must be at least 1 day');
+        hasError = true;
+      }
+
+      // Check at least 1 working day is selected
+      const selectedDays = [];
+      document.querySelectorAll('input[name="workingDay"]:checked').forEach(cb => {
+        selectedDays.push(Number(cb.value));
+      });
+
+      if (selectedDays.length === 0) {
+        showToast('Please select at least one company working day', 'error');
+        hasError = true;
+      }
+
+      if (hasError) return;
+
+      const updatedCompany = {
+        name: nameInput.value.trim(),
+        officeStart: startInput.value,
+        graceMinutes: Number(graceInput.value),
+        yearlyLeaveQuota: Number(quotaInput.value),
+        workingDays: selectedDays
+      };
+
+      saveCompany(updatedCompany);
+
+      // Save bonus LLM key if typed
+      const llmKey = document.getElementById('setting-llm-key').value.trim();
+      if (llmKey) {
+        localStorage.setItem(STORAGE_KEYS.LLM_KEY, llmKey);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.LLM_KEY);
+      }
+
+      setupNavigationUser(getCurrentUser());
+      updateSummary(updatedCompany);
+      showToast('Company policies and working schedule updated successfully!', 'success');
+    }
+  </script>
+</body>
+</html>
